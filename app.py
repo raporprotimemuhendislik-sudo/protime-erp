@@ -15,10 +15,10 @@ st.set_page_config(page_title="PROTIME ERP", layout="wide")
 def get_db_connection():
     return sqlite3.connect("protime_erp_web.db", check_same_thread=False)
 
-def pdf_olustur(paket, toplam_usd, kur):
+def pdf_olustur(paket, toplam_usd, kur, baslik):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
-    elements = [Paragraph("PROTIME MÜHENDİSLİK - HAKEDİŞ RAPORU", getSampleStyleSheet()['Title'])]
+    elements = [Paragraph(baslik, getSampleStyleSheet()['Title'])]
     data = [["Marka", "Ürün", "Fiyat ($)", "Fiyat (TL)"]]
     for item in paket:
         data.append([item['marka'], item['urun'], f"${item['n_usd']:.2f}", f"{(item['n_usd']*kur):,.2f} TL"])
@@ -31,12 +31,12 @@ def pdf_olustur(paket, toplam_usd, kur):
 
 # --- SESSION BAŞLATMA ---
 if "usd_kuru" not in st.session_state: st.session_state.usd_kuru = 34.50
-if "paket" not in st.session_state: st.session_state.paket = []
+if "paket_GES" not in st.session_state: st.session_state.paket_GES = []
+if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = []
 
-# --- YAN MENÜ (KUR TAKİBİ VE İŞLER) ---
+# --- YAN MENÜ ---
 with st.sidebar:
     st.title("PROTIME MÜHENDİSLİK")
-    # Kur Göstergesi
     try:
         res = requests.get("https://api.frankfurter.app/latest?from=USD&to=TRY", timeout=3)
         st.session_state.usd_kuru = float(res.json()["rates"]["TRY"])
@@ -44,24 +44,10 @@ with st.sidebar:
     st.metric("📊 CANLI USD/TL", f"{st.session_state.usd_kuru:.4f}")
     
     st.write("---")
-    aktif_modul = "GES" if "GES" in st.radio("DEPARTMAN", ["☀️ GES", "⚡ ELEKTRİK"]) else "ELEKTRIK"
-    st.write("---")
-    
-    st.subheader("📌 YAPILACAKLAR")
-    yeni_is = st.text_input("Yeni iş ekle...")
-    if st.button("İş Ekle") and yeni_is:
-        conn = get_db_connection()
-        conn.execute("INSERT INTO yapılacaklar (is_tanimi) VALUES (?)", (yeni_is,))
-        conn.commit(); conn.close(); st.rerun()
-    
-    conn = get_db_connection()
-    for row in conn.execute("SELECT id, is_tanimi FROM yapılacaklar").fetchall():
-        c1, c2 = st.columns([4, 1])
-        c1.write(f"- {row[1]}")
-        if c2.button("❌", key=f"is_{row[0]}"):
-            conn.execute("DELETE FROM yapılacaklar WHERE id=?", (row[0],))
-            conn.commit(); conn.close(); st.rerun()
-    conn.close()
+    secim = st.radio("DEPARTMAN", ["☀️ GES", "⚡ ELEKTRİK TAAHHÜT"])
+    aktif_modul = "GES" if "GES" in secim else "ELEKTRIK"
+    # Aktif departmana göre ilgili paketi seç
+    aktif_paket = st.session_state.paket_GES if aktif_modul == "GES" else st.session_state.paket_ELEKTRIK
 
 # --- ANA İÇERİK ---
 st.title(f"{aktif_modul} İSTASYONU")
@@ -69,16 +55,17 @@ c1, c2 = st.columns([2, 1])
 
 with c1:
     st.subheader("📦 Katalog")
-    with st.container(height=350): # Scroll edilebilir alan
+    with st.container(height=350):
         conn = get_db_connection()
         for r in conn.execute("SELECT id, marka, urun_adi, nakit_usd FROM urunler WHERE modul=?", (aktif_modul,)).fetchall():
             cols = st.columns([3, 2, 1, 1])
             cols[0].caption(f"{r[1]} - {r[2]}")
             cols[1].caption(f"${r[3]}")
-            if cols[2].button("🗑️", key=f"del_{r[0]}"):
+            if cols[2].button("🗑️", key=f"del_{aktif_modul}_{r[0]}"):
                 conn.execute("DELETE FROM urunler WHERE id=?", (r[0],)); conn.commit(); st.rerun()
-            if cols[3].button("➕", key=f"add_{r[0]}"):
-                st.session_state.paket.append({"marka": r[1], "urun": r[2], "n_usd": r[3]})
+            if cols[3].button("➕", key=f"add_{aktif_modul}_{r[0]}"):
+                if aktif_modul == "GES": st.session_state.paket_GES.append({"marka": r[1], "urun": r[2], "n_usd": r[3]})
+                else: st.session_state.paket_ELEKTRIK.append({"marka": r[1], "urun": r[2], "n_usd": r[3]})
                 st.rerun()
         conn.close()
 
@@ -91,18 +78,19 @@ with c2:
             conn.execute("INSERT INTO urunler (modul, marka, urun_adi, nakit_usd) VALUES (?,?,?,?)", (aktif_modul, m, t, f))
             conn.commit(); conn.close(); st.rerun()
 
-# --- HAKEDİŞ VE PDF ---
-if st.session_state.paket:
-    st.subheader("📊 Finansal Hakediş")
-    toplam_usd = sum(i["n_usd"] for i in st.session_state.paket)
-    for i, item in enumerate(st.session_state.paket):
+# --- HAKEDİŞ ---
+st.subheader(f"📊 {aktif_modul} Finansal Hakediş")
+if aktif_paket:
+    toplam_usd = sum(i["n_usd"] for i in aktif_paket)
+    for i, item in enumerate(aktif_paket):
         st.write(f"✅ {item['marka']} | {item['urun']} | ${item['n_usd']}")
     
     st.info(f"💰 TOPLAM: ${toplam_usd:,.2f} / {(toplam_usd*st.session_state.usd_kuru):,.2f} TL")
     
     c_btn1, c_btn2 = st.columns(2)
-    pdf_data = pdf_olustur(st.session_state.paket, toplam_usd, st.session_state.usd_kuru)
-    c_btn1.download_button("📄 PDF İNDİR", pdf_data, "hakedis.pdf", "application/pdf")
-    if c_btn2.button("🗑️ TEMİZLE"):
-        st.session_state.paket = []
+    pdf_data = pdf_olustur(aktif_paket, toplam_usd, st.session_state.usd_kuru, f"{aktif_modul} HAKEDİŞ")
+    c_btn1.download_button("📄 PDF İNDİR", pdf_data, f"{aktif_modul}_hakedis.pdf", "application/pdf")
+    if c_btn2.button("🗑️ LİSTEYİ TEMİZLE"):
+        if aktif_modul == "GES": st.session_state.paket_GES = []
+        else: st.session_state.paket_ELEKTRIK = []
         st.rerun()
