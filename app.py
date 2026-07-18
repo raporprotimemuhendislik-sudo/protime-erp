@@ -13,14 +13,14 @@ st.set_page_config(page_title="PROTIME ERP", layout="wide")
 def get_db_connection():
     return sqlite3.connect("protime_yeni.db", check_same_thread=False)
 
-# Tabloyu sıfırdan kurar
+# Tablo kurulumu
 conn = get_db_connection()
 conn.execute("CREATE TABLE IF NOT EXISTS urunler_v3 (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
 conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
 conn.commit(); conn.close()
 
 # --- PDF OLUŞTURMA ---
-def pdf_olustur(paket, toplam, baslik, birim):
+def pdf_olustur(paket, toplam, baslik, birim, kur=None):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()
@@ -29,6 +29,8 @@ def pdf_olustur(paket, toplam, baslik, birim):
     for item in paket:
         data.append([item['marka'], item['urun'], f"{item['fiyat']:.2f} {birim}"])
     data.append(["", "TOPLAM", f"{toplam:,.2f} {birim}"])
+    if kur:
+        data.append(["", "TOPLAM TL", f"{(toplam*kur):,.2f} TL"])
     table = Table(data, colWidths=[150, 200, 100])
     table.setStyle(TableStyle([('GRID', (0,0), (-1,-1), 0.5, colors.black), ('BACKGROUND', (0,0), (-1,0), colors.lightgrey)]))
     elements.append(table)
@@ -57,11 +59,10 @@ with st.sidebar:
     st.write("---")
     st.subheader("📌 YAPILACAK İŞLER")
     yeni_is = st.text_input("Yeni iş ekle...", key="yeni_is_input")
-    if st.button("İşi Ekle"):
-        if yeni_is:
-            conn = get_db_connection()
-            conn.execute("INSERT INTO yapılacaklar (is_tanimi) VALUES (?)", (yeni_is,))
-            conn.commit(); conn.close(); st.rerun()
+    if st.button("İşi Ekle") and yeni_is:
+        conn = get_db_connection()
+        conn.execute("INSERT INTO yapılacaklar (is_tanimi) VALUES (?)", (yeni_is,))
+        conn.commit(); conn.close(); st.rerun()
     
     conn = get_db_connection()
     isler = conn.execute("SELECT id, is_tanimi FROM yapılacaklar").fetchall()
@@ -106,12 +107,21 @@ st.subheader(f"📊 {aktif_modul} Finansal Hakediş")
 if aktif_paket:
     toplam = sum(i["fiyat"] for i in aktif_paket)
     birim = "$" if aktif_modul == "GES" else "TL"
+    
     for item in aktif_paket:
         st.write(f"✅ {item['marka']} | {item['urun']} | {item['fiyat']} {birim}")
-    st.info(f"💰 TOPLAM: {toplam:,.2f} {birim}")
+    
+    # GES ise TL karşılığını göster
+    if aktif_modul == "GES":
+        st.info(f"💰 TOPLAM: ${toplam:,.2f} | ₺{(toplam * st.session_state.usd_kuru):,.2f} TL")
+    else:
+        st.info(f"💰 TOPLAM: {toplam:,.2f} TL")
     
     col_pdf, col_temiz = st.columns(2)
-    pdf_buffer = pdf_olustur(aktif_paket, toplam, f"{aktif_modul} Raporu", birim)
+    # Rapor oluştururken GES için kur parametresini ekle
+    kur_param = st.session_state.usd_kuru if aktif_modul == "GES" else None
+    pdf_buffer = pdf_olustur(aktif_paket, toplam, f"{aktif_modul} Raporu", birim, kur_param)
+    
     col_pdf.download_button("📄 PDF İNDİR", pdf_buffer, "rapor.pdf", "application/pdf")
     if col_temiz.button("🗑️ Listeyi Temizle"):
         if aktif_modul == "GES": st.session_state.paket_GES = []
