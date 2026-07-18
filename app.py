@@ -13,6 +13,15 @@ st.set_page_config(page_title="PROTIME ERP", layout="wide")
 def get_db_connection():
     return sqlite3.connect("protime_erp_web.db", check_same_thread=False)
 
+# Tablo ismini urunler_v2 yaparak çakışmayı kesin olarak engelliyoruz
+def veritabani_kur():
+    conn = get_db_connection()
+    conn.execute("CREATE TABLE IF NOT EXISTS urunler_v2 (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
+    conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
+    conn.commit()
+    conn.close()
+
+veritabani_kur()
 # Tabloyu zorunlu olarak sıfırlayıp yeni yapıya göre kurar (Hata almamak için)
 def veritabani_kur():
     conn = get_db_connection()
