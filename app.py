@@ -9,14 +9,12 @@ from reportlab.lib import colors
 
 st.set_page_config(page_title="PROTIME ERP", layout="wide")
 
-# --- VERİTABANI ---
+# --- VERİTABANI (durum sütunu eklendi: 0=Bekleyen, 1=Yapılacak) ---
 def get_db_connection():
-    return sqlite3.connect("protime_erp_final.db", check_same_thread=False)
-
-conn = get_db_connection()
-conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
-conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
-conn.commit(); conn.close()
+    conn = sqlite3.connect("protime_erp_final.db", check_same_thread=False)
+    conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
+    conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT, durum INTEGER DEFAULT 0)")
+    return conn
 
 # --- PDF OLUŞTURMA ---
 def pdf_olustur(paket, toplam, birim, kur=None):
@@ -27,7 +25,6 @@ def pdf_olustur(paket, toplam, birim, kur=None):
     
     data = [["Marka", "Urun", "Fiyat"]]
     for item in paket:
-        # Karakter temizliği
         m = item['marka'].replace('İ', 'I').replace('ı', 'i').replace('Ş', 'S').replace('ş', 's').replace('Ç', 'C').replace('ç', 'c').replace('Ğ', 'G').replace('ğ', 'g').replace('Ü', 'U').replace('ü', 'u').replace('Ö', 'O').replace('ö', 'o')
         u = item['urun'].replace('İ', 'I').replace('ı', 'i').replace('Ş', 'S').replace('ş', 's').replace('Ç', 'C').replace('ç', 'c').replace('Ğ', 'G').replace('ğ', 'g').replace('Ü', 'U').replace('ü', 'u').replace('Ö', 'O').replace('ö', 'o')
         data.append([m, u, f"{item['fiyat']:.2f} {birim}"])
@@ -60,20 +57,31 @@ with st.sidebar:
     aktif_paket = st.session_state.paket_GES if aktif_modul == "GES" else st.session_state.paket_ELEKTRIK
     
     st.write("---")
-    st.subheader("📌 YAPILACAK İŞLER")
+    
+    # 1. BEKLEYEN İŞLER
+    st.subheader("⏳ BEKLEYEN İŞLER")
     yeni_is = st.text_input("Yeni iş ekle...", key="yeni_is")
-    if st.button("İşi Ekle") and yeni_is:
+    if st.button("Ekle") and yeni_is:
         conn = get_db_connection()
-        conn.execute("INSERT INTO yapılacaklar (is_tanimi) VALUES (?)", (yeni_is,))
+        conn.execute("INSERT INTO yapılacaklar (is_tanimi, durum) VALUES (?, 0)", (yeni_is,))
         conn.commit(); conn.close(); st.rerun()
     
     conn = get_db_connection()
-    isler = conn.execute("SELECT id, is_tanimi FROM yapılacaklar").fetchall()
-    if isler: st.warning(f"⚠️ {len(isler)} adet bekleyen iş var!")
-    for row in isler:
+    bekleyenler = conn.execute("SELECT id, is_tanimi FROM yapılacaklar WHERE durum=0").fetchall()
+    for row in bekleyenler:
         c1, c2 = st.columns([4, 1])
         c1.write(f"• {row[1]}")
-        if c2.button("✅", key=f"is_{row[0]}"):
+        if c2.button("✅", key=f"bekleyen_{row[0]}"):
+            conn.execute("UPDATE yapılacaklar SET durum=1 WHERE id=?", (row[0],)); conn.commit(); st.rerun()
+
+    # 2. YAPILACAK İŞLER
+    st.write("---")
+    st.subheader("📋 YAPILACAK İŞLER")
+    yapilacaklar = conn.execute("SELECT id, is_tanimi FROM yapılacaklar WHERE durum=1").fetchall()
+    for row in yapilacaklar:
+        c1, c2 = st.columns([4, 1])
+        c1.write(f"✓ {row[1]}")
+        if c2.button("🗑️", key=f"sil_{row[0]}"):
             conn.execute("DELETE FROM yapılacaklar WHERE id=?", (row[0],)); conn.commit(); st.rerun()
     conn.close()
 
