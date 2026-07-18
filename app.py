@@ -85,13 +85,6 @@ with st.sidebar:
 # --- ANA İÇERİK ---
 st.title(f"{aktif_modul} İSTASYONU")
 arama = st.text_input("🔍 Ürün veya marka ara...")
-
-        for u in urunler_listesi:
-            conn.execute("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?,?,?,?)", u)
-        conn.commit()
-        conn.close()
-        st.success("Ürünler başarıyla eklendi!")
-        st.rerun()
 c1, c2 = st.columns([2, 1])
 
 with c1:
