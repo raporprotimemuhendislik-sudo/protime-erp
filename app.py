@@ -86,11 +86,17 @@ st.title(f"{aktif_modul} İSTASYONU")
 c1, c2 = st.columns([2, 1])
 
 with c1:
-    st.subheader("📦 Katalog (Scroll edilebilir)")
-    # Ürünlerin kaydırılabilir kutusu
-    with st.container(height=400): 
+    st.subheader("📦 Katalog")
+    # Arama çubuğu
+    arama_terimi = st.text_input("🔍 Ürün veya marka ara...", key="arama_input")
+    
+    with st.container(height=350): 
         conn = get_db_connection()
-        for r in conn.execute("SELECT id, marka, urun_adi, fiyat FROM urunler WHERE modul=?", (aktif_modul,)).fetchall():
+        # Sorguyu arama terimine göre güncelledik
+        sorgu = "SELECT id, marka, urun_adi, fiyat FROM urunler WHERE modul=? AND (marka LIKE ? OR urun_adi LIKE ?)"
+        arama_filtresi = f"%{arama_terimi}%"
+        
+        for r in conn.execute(sorgu, (aktif_modul, arama_filtresi, arama_filtresi)).fetchall():
             cols = st.columns([3, 2, 1, 1])
             cols[0].write(f"{r[1]} - {r[2]}")
             cols[1].write(f"{r[3]} {'$' if aktif_modul=='GES' else 'TL'}")
