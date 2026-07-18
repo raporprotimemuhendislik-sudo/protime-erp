@@ -11,27 +11,13 @@ st.set_page_config(page_title="PROTIME ERP", layout="wide")
 
 # --- VERİTABANI BAĞLANTISI ---
 def get_db_connection():
-    return sqlite3.connect("protime_erp_web.db", check_same_thread=False)
+    return sqlite3.connect("protime_yeni.db", check_same_thread=False)
 
-# Tablo ismini urunler_v2 yaparak çakışmayı kesin olarak engelliyoruz
-def veritabani_kur():
-    conn = get_db_connection()
-    conn.execute("CREATE TABLE IF NOT EXISTS urunler_v2 (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
-    conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
-    conn.commit()
-    conn.close()
-
-veritabani_kur()
-# Tabloyu zorunlu olarak sıfırlayıp yeni yapıya göre kurar (Hata almamak için)
-def veritabani_kur():
-    conn = get_db_connection()
-    # Sütun isimlerini güncelledik: 'fiyat' sütunu hem GES hem Elektrik için kullanılıyor
-    conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
-    conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
-    conn.commit()
-    conn.close()
-
-veritabani_kur()
+# Tabloyu sıfırdan kurar
+conn = get_db_connection()
+conn.execute("CREATE TABLE IF NOT EXISTS urunler_v3 (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
+conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
+conn.commit(); conn.close()
 
 # --- PDF OLUŞTURMA ---
 def pdf_olustur(paket, toplam, baslik, birim):
@@ -49,7 +35,7 @@ def pdf_olustur(paket, toplam, baslik, birim):
     doc.build(elements)
     return buffer
 
-# --- OTURUM BAŞLATMA ---
+# --- SESSION ---
 if "usd_kuru" not in st.session_state: st.session_state.usd_kuru = 34.50
 if "paket_GES" not in st.session_state: st.session_state.paket_GES = []
 if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = []
@@ -57,7 +43,6 @@ if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = [
 # --- YAN MENÜ ---
 with st.sidebar:
     st.title("PROTIME MÜHENDİSLİK")
-    # Kur güncelleme
     try:
         res = requests.get("https://api.frankfurter.app/latest?from=USD&to=TRY", timeout=3)
         st.session_state.usd_kuru = float(res.json()["rates"]["TRY"])
@@ -96,26 +81,24 @@ with c1:
     st.subheader("📦 Katalog")
     with st.container(height=350):
         conn = get_db_connection()
-        for r in conn.execute("SELECT id, marka, urun_adi, fiyat FROM urunler WHERE modul=?", (aktif_modul,)).fetchall():
+        for r in conn.execute("SELECT id, marka, urun_adi, fiyat FROM urunler_v3 WHERE modul=?", (aktif_modul,)).fetchall():
             cols = st.columns([3, 2, 1, 1])
             cols[0].caption(f"{r[1]} - {r[2]}")
             cols[1].caption(f"{r[3]} {'$' if aktif_modul=='GES' else 'TL'}")
-            if cols[2].button("🗑️", key=f"del_urun_{r[0]}"):
-                conn.execute("DELETE FROM urunler WHERE id=?", (r[0],)); conn.commit(); st.rerun()
-            if cols[3].button("➕", key=f"add_urun_{r[0]}"):
+            if cols[2].button("🗑️", key=f"del_{r[0]}"):
+                conn.execute("DELETE FROM urunler_v3 WHERE id=?", (r[0],)); conn.commit(); st.rerun()
+            if cols[3].button("➕", key=f"add_{r[0]}"):
                 aktif_paket.append({"marka": r[1], "urun": r[2], "fiyat": r[3]})
                 st.rerun()
         conn.close()
 
 with c2:
     st.subheader("➕ Yeni Ürün Ekle")
-    with st.form("yeni_urun_form", clear_on_submit=True):
-        m = st.text_input("Marka")
-        t = st.text_input("Tanım")
-        f = st.number_input("Fiyat", step=1.0)
-        if st.form_submit_button("Veritabanına Kaydet"):
+    with st.form("yeni_form", clear_on_submit=True):
+        m = st.text_input("Marka"); t = st.text_input("Tanım"); f = st.number_input("Fiyat")
+        if st.form_submit_button("Kaydet"):
             conn = get_db_connection()
-            conn.execute("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?,?,?,?)", (aktif_modul, m, t, f))
+            conn.execute("INSERT INTO urunler_v3 (modul, marka, urun_adi, fiyat) VALUES (?,?,?,?)", (aktif_modul, m, t, f))
             conn.commit(); conn.close(); st.rerun()
 
 # --- HAKEDİŞ ---
@@ -123,15 +106,13 @@ st.subheader(f"📊 {aktif_modul} Finansal Hakediş")
 if aktif_paket:
     toplam = sum(i["fiyat"] for i in aktif_paket)
     birim = "$" if aktif_modul == "GES" else "TL"
-    
     for item in aktif_paket:
         st.write(f"✅ {item['marka']} | {item['urun']} | {item['fiyat']} {birim}")
-    
     st.info(f"💰 TOPLAM: {toplam:,.2f} {birim}")
     
     col_pdf, col_temiz = st.columns(2)
-    pdf_buffer = pdf_olustur(aktif_paket, toplam, f"{aktif_modul} Hakediş Raporu", birim)
-    col_pdf.download_button("📄 PDF İNDİR", pdf_buffer, f"{aktif_modul}_hakedis.pdf", "application/pdf")
+    pdf_buffer = pdf_olustur(aktif_paket, toplam, f"{aktif_modul} Raporu", birim)
+    col_pdf.download_button("📄 PDF İNDİR", pdf_buffer, "rapor.pdf", "application/pdf")
     if col_temiz.button("🗑️ Listeyi Temizle"):
         if aktif_modul == "GES": st.session_state.paket_GES = []
         else: st.session_state.paket_ELEKTRIK = []
