@@ -128,7 +128,7 @@ st.title(f"PROTIME ERP // {aktif_modul} DEPARTMANI İSTASYONU")
 col_left, col_right = st.columns([2, 1])
 
 with col_left:
-    st.subheader("📦 Şirket Ortak Master Katalog Verileri")
+    st.subheader("📦 Şiriket Ortak Master Katalog Verileri")
     arama = st.text_input("🔍 Akıllı Model veya Üretici Ara...", "")
     
     conn = get_db_connection()
@@ -142,34 +142,47 @@ with col_left:
     
     tablo_verisi = []
     for r in rows:
+        # PyArrow çökme hatasını önlemek için ham tuple verisini string/sayı olarak ayrıştırıyoruz
         tablo_verisi.append({
-            "Seç": False, "ID": r[0], "Marka": r[1], "Ürün Açıklaması / Model Özellikleri": r[2],
-            "Nakit ($)": f"${r[3]:,.2f}", "KDV'li ($)": f"${r[4]:,.2f}",
-            "Nakit (TL)": f"{r[3]*USD_KURU:,.2f} TL", "KDV'li (TL)": f"{r[4]*USD_KURU:,.2f} TL",
-            "_raw": r
+            "Seç": False, 
+            "ID": int(r[0]), 
+            "Marka": str(r[1]), 
+            "Ürün Açıklaması / Model Özellikleri": str(r[2]),
+            "Nakit ($)": f"${r[3]:,.2f}", 
+            "KDV'li ($)": f"${r[4]:,.2f}",
+            "Nakit (TL)": f"{r[3]*USD_KURU:,.2f} TL", 
+            "KDV'li (TL)": f"{r[4]*USD_KURU:,.2f} TL",
+            "raw_nakit_usd": float(r[3]),
+            "raw_kdv_usd": float(r[4])
         })
         
     if tablo_verisi:
-        # Etkileşimli Excel benzeri modern data editor
+        # Hatalardan arındırılmış veri editörü
         edited_df = st.data_editor(
             tablo_verisi, 
             column_config={"Seç": st.column_config.CheckboxColumn(required=True)},
-            disabled=["ID", "Marka", "Ürün Açıklaması / Model Özellikleri", "Nakit ($)", "KDV'li ($)", "Nakit (TL)", "KDV'li (TL)"],
+            disabled=["ID", "Marka", "Ürün Açıklaması / Model Özellikleri", "Nakit ($)", "KDV'li ($)", "Nakit (TL)", "KDV'li (TL)", "raw_nakit_usd", "raw_kdv_usd"],
             use_container_width=True, key=f"grid_{aktif_modul}"
         )
         
         c_btn1, c_btn2 = st.columns([1, 1])
         with c_btn1:
             if st.button("📥 SEÇİLİ ÖĞELERİ PROJEYE TRANSFER ET"):
-                secilenler = [x["_raw"] for x in edited_df if x["Seç"]]
+                secilenler = [x for x in edited_df if x["Seç"]]
                 if secilenler:
                     for s in secilenler:
-                        st.session_state.paket.append({"id": s[0], "marka": s[1], "urun_adi": s[2], "n_usd": s[3], "k_usd": s[4]})
+                        st.session_state.paket.append({
+                            "id": s["ID"], 
+                            "marka": s["Marka"], 
+                            "urun_adi": s["Ürün Açıklaması / Model Özellikleri"], 
+                            "n_usd": s["raw_nakit_usd"], 
+                            "k_usd": s["raw_kdv_usd"]
+                        })
                     st.success(f"{len(secilenler)} adet ürün proje havuzuna aktarıldı!")
                     st.rerun()
         with c_btn2:
             if st.button("🗑️ Seçili Ürünleri Katalogdan Kalıcı Sil"):
-                silinecekler = [x["_raw"][0] for x in edited_df if x["Seç"]]
+                silinecekler = [x["ID"] for x in edited_df if x["Seç"]]
                 if silinecekler:
                     conn = get_db_connection()
                     cursor = conn.cursor()
@@ -221,7 +234,7 @@ if st.session_state.paket:
         
     st.table(pk_df)
     
-    # Şık Finansal Özet Bandı (KPI Panel)
+    # Finansal Özet Bandı
     st.markdown(f"""
         <div style="background-color:#0F172A; color:white; padding:16px; border-radius:6px; text-align:center; font-weight:bold; font-size:15px;">
         📊 PROJE HAKEDİŞ ÖZETİ &nbsp;|&nbsp; Toplam Matrah: ${t_n_usd:,.2f} ({t_n_usd*USD_KURU:,.2f} TL) &nbsp;|&nbsp; Brüt Hakediş (KDV Dahil): ${t_k_usd:,.2f} ({t_k_usd*USD_KURU:,.2f} TL)
@@ -236,7 +249,6 @@ if st.session_state.paket:
             st.rerun()
             
     with c2:
-        # Bulut/Web Uyumlu Gelişmiş PDF Rapor Motoru
         try:
             pdf_buffer = io.BytesIO()
             doc = SimpleDocTemplate(pdf_buffer, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
