@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 import sqlite3
 import io
 from reportlab.lib.pagesizes import A4
@@ -8,55 +9,120 @@ from reportlab.lib import colors
 
 st.set_page_config(page_title="PROTIME ERP", layout="wide")
 
-# Veritabanı kurulumu
-def get_db():
-    db = sqlite3.connect("protime_yeni_sistem.db", check_same_thread=False)
-    return db
+# --- VERİTABANI ---
+def get_db_connection():
+    return sqlite3.connect("protime_erp_final.db", check_same_thread=False)
 
-conn = get_db()
-conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
-conn.execute("CREATE TABLE IF NOT EXISTS isler (id INTEGER PRIMARY KEY, tanim TEXT, durum INTEGER)") # 0:Bekleyen, 1:Yapılacak
-conn.commit()
-conn.close()
+conn = get_db_connection()
+conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
+conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
+conn.commit(); conn.close()
 
-# PDF temizleme
-def temizle(t):
-    return str(t).replace('İ','I').replace('ı','i').replace('Ş','S').replace('ş','s').replace('Ç','C').replace('ç','c').replace('Ğ','G').replace('ğ','g').replace('Ü','U').replace('ü','u').replace('Ö','O').replace('ö','o')
-
-# Yan Menü: İş Takibi
-with st.sidebar:
-    st.subheader("📌 BEKLEYEN İŞLER")
-    yeni = st.text_input("Yeni iş girin")
-    if st.button("Ekle") and yeni:
-        c = get_db(); c.execute("INSERT INTO isler (tanim, durum) VALUES (?, 0)", (yeni,)); c.commit(); c.close(); st.rerun()
+# --- PDF OLUŞTURMA ---
+def pdf_olustur(paket, toplam, birim, kur=None):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    styles = getSampleStyleSheet()
+    elements = [Paragraph("PROTIME FIYAT LISTESI", styles['Title'])]
     
-    c = get_db()
-    for row in c.execute("SELECT id, tanim FROM isler WHERE durum=0").fetchall():
-        col1, col2 = st.columns([3,1])
-        col1.write(row[1])
-        if col2.button("✅", key=f"b_{row[0]}"): c.execute("UPDATE isler SET durum=1 WHERE id=?", (row[0],)); c.commit(); st.rerun()
+    data = [["Marka", "Urun", "Fiyat"]]
+    for item in paket:
+        # Karakter temizliği
+        m = item['marka'].replace('İ', 'I').replace('ı', 'i').replace('Ş', 'S').replace('ş', 's').replace('Ç', 'C').replace('ç', 'c').replace('Ğ', 'G').replace('ğ', 'g').replace('Ü', 'U').replace('ü', 'u').replace('Ö', 'O').replace('ö', 'o')
+        u = item['urun'].replace('İ', 'I').replace('ı', 'i').replace('Ş', 'S').replace('ş', 's').replace('Ç', 'C').replace('ç', 'c').replace('Ğ', 'G').replace('ğ', 'g').replace('Ü', 'U').replace('ü', 'u').replace('Ö', 'O').replace('ö', 'o')
+        data.append([m, u, f"{item['fiyat']:.2f} {birim}"])
+    
+    data.append(["", "TOPLAM", f"{toplam:,.2f} {birim}"])
+    if kur: data.append(["", "TOPLAM TL", f"{(toplam*kur):,.2f} TL"])
+    
+    table = Table(data, colWidths=[150, 200, 100])
+    table.setStyle(TableStyle([('GRID', (0,0), (-1,-1), 0.5, colors.black), ('BACKGROUND', (0,0), (-1,0), colors.lightgrey)]))
+    elements.append(table)
+    doc.build(elements)
+    return buffer
+
+# --- OTURUM ---
+if "usd_kuru" not in st.session_state: st.session_state.usd_kuru = 34.50
+if "paket_GES" not in st.session_state: st.session_state.paket_GES = []
+if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = []
+
+# --- YAN MENÜ ---
+with st.sidebar:
+    st.title("PROTIME MÜHENDİSLİK")
+    try:
+        res = requests.get("https://api.frankfurter.app/latest?from=USD&to=TRY", timeout=2)
+        st.session_state.usd_kuru = float(res.json()["rates"]["TRY"])
+    except: st.session_state.usd_kuru = 34.50
+    st.metric("📊 CANLI USD/TL", f"{st.session_state.usd_kuru:.4f}")
+    
+    secim = st.radio("DEPARTMAN", ["☀️ GES (USD)", "⚡ ELEKTRİK (TL)"])
+    aktif_modul = "GES" if "GES" in secim else "ELEKTRIK"
+    aktif_paket = st.session_state.paket_GES if aktif_modul == "GES" else st.session_state.paket_ELEKTRIK
     
     st.write("---")
-    st.subheader("📋 YAPILACAK İŞLER")
-    for row in c.execute("SELECT id, tanim FROM isler WHERE durum=1").fetchall():
-        col1, col2 = st.columns([3,1])
-        col1.write(row[1])
-        if col2.button("❌", key=f"y_{row[0]}"): c.execute("DELETE FROM isler WHERE id=?", (row[0],)); c.commit(); st.rerun()
-    c.close()
-
-# Ana Sayfa
-tab1, tab2 = st.tabs(["☀️ GES (USD)", "⚡ ELEKTRİK (TL)"])
-modul = "GES" if tab1 else "ELEKTRIK"
-
-with tab1 if modul == "GES" else tab2:
-    st.header(f"{modul} Kataloğu")
-    c = get_db()
-    # Ekleme formu
-    with st.form("ekle"):
-        m, u, f = st.text_input("Marka"), st.text_input("Ürün"), st.number_input("Fiyat")
-        if st.form_submit_button("Ürün Kaydet"): c.execute("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?,?,?,?)", (modul, m, u, f)); c.commit(); st.rerun()
+    st.subheader("📌 YAPILACAK İŞLER")
+    yeni_is = st.text_input("Yeni iş ekle...", key="yeni_is")
+    if st.button("İşi Ekle") and yeni_is:
+        conn = get_db_connection()
+        conn.execute("INSERT INTO yapılacaklar (is_tanimi) VALUES (?)", (yeni_is,))
+        conn.commit(); conn.close(); st.rerun()
     
-    # Katalog
-    for r in c.execute("SELECT id, marka, urun_adi, fiyat FROM urunler WHERE modul=?", (modul,)).fetchall():
-        st.write(f"{r[1]} - {r[2]} : {r[3]}")
-    c.close()
+    conn = get_db_connection()
+    isler = conn.execute("SELECT id, is_tanimi FROM yapılacaklar").fetchall()
+    if isler: st.warning(f"⚠️ {len(isler)} adet bekleyen iş var!")
+    for row in isler:
+        c1, c2 = st.columns([4, 1])
+        c1.write(f"• {row[1]}")
+        if c2.button("✅", key=f"is_{row[0]}"):
+            conn.execute("DELETE FROM yapılacaklar WHERE id=?", (row[0],)); conn.commit(); st.rerun()
+    conn.close()
+
+# --- ANA İÇERİK ---
+st.title(f"{aktif_modul} İSTASYONU")
+arama = st.text_input("🔍 Ürün veya marka ara...")
+c1, c2 = st.columns([2, 1])
+
+with c1:
+    st.subheader("📦 Katalog")
+    with st.container(height=400):
+        conn = get_db_connection()
+        sorgu = "SELECT id, marka, urun_adi, fiyat FROM urunler WHERE modul=? AND (marka LIKE ? OR urun_adi LIKE ?)"
+        for r in conn.execute(sorgu, (aktif_modul, f"%{arama}%", f"%{arama}%")).fetchall():
+            cols = st.columns([3, 2, 1, 1])
+            cols[0].write(f"{r[1]} - {r[2]}")
+            cols[1].write(f"{r[3]} {'$' if aktif_modul=='GES' else 'TL'}")
+            if cols[2].button("🗑️", key=f"del_{r[0]}"):
+                conn.execute("DELETE FROM urunler WHERE id=?", (r[0],)); conn.commit(); st.rerun()
+            if cols[3].button("➕", key=f"add_{r[0]}"):
+                aktif_paket.append({"marka": r[1], "urun": r[2], "fiyat": r[3]})
+                st.rerun()
+        conn.close()
+
+with c2:
+    st.subheader("➕ Yeni Ürün")
+    with st.form("yeni", clear_on_submit=True):
+        m = st.text_input("Marka"); t = st.text_input("Ürün"); f = st.number_input("Fiyat")
+        if st.form_submit_button("Kaydet"):
+            conn = get_db_connection()
+            conn.execute("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?,?,?,?)", (aktif_modul, m, t, f))
+            conn.commit(); conn.close(); st.rerun()
+
+# --- HAKEDİŞ ---
+st.subheader(f"📊 {aktif_modul} Hakediş Paketi")
+if aktif_paket:
+    toplam = sum(i["fiyat"] for i in aktif_paket)
+    for i, item in enumerate(aktif_paket):
+        st.write(f"✅ {item['marka']} | {item['urun']} | {item['fiyat']}")
+    
+    if aktif_modul == "GES":
+        st.info(f"💰 TOPLAM: ${toplam:,.2f} | ₺{(toplam * st.session_state.usd_kuru):,.2f} TL")
+    else:
+        st.info(f"💰 TOPLAM: {toplam:,.2f} TL")
+        
+    kur_val = st.session_state.usd_kuru if aktif_modul == "GES" else None
+    pdf_buf = pdf_olustur(aktif_paket, toplam, "$" if aktif_modul == "GES" else "TL", kur_val)
+    st.download_button("📄 PDF İNDİR", pdf_buf, "fatura.pdf", "application/pdf")
+    if st.button("Listeyi Temizle"):
+        if aktif_modul == "GES": st.session_state.paket_GES = []
+        else: st.session_state.paket_ELEKTRIK = []
+        st.rerun()
