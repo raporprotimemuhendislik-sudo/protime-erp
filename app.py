@@ -70,7 +70,7 @@ with st.sidebar:
         conn = get_db_connection()
         conn.execute("INSERT INTO yapılacaklar (is_tanimi) VALUES (?)", (yeni_is,))
         conn.commit(); conn.close()
-        st.toast("✅ İş başarıyla eklendi!", icon="🎉") # Bildirim
+        st.success("✅ İş başarıyla eklendi!")
         st.rerun()
     
     conn = get_db_connection()
