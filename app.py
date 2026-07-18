@@ -85,6 +85,24 @@ with st.sidebar:
 # --- ANA İÇERİK ---
 st.title(f"{aktif_modul} İSTASYONU")
 arama = st.text_input("🔍 Ürün veya marka ara...")
+# --- HAZIR ÜRÜN YÜKLEME (Bu bloğu ekle) ---
+with st.expander("⚙️ Hazır Ürün Listesini Veritabanına Aktar"):
+    if st.button("Tüm Listeyi Veritabanına Ekle"):
+        conn = get_db_connection()
+        urunler_listesi = [
+            ("GES", "SOLINVED", "1.2 KW MPPT AKILLI İNVERTER", 132.61),
+            ("GES", "SOLINVED", "3.6KW 24V MPPT AKILLI İNVERTER", 206.28),
+            ("GES", "SOLINVED", "5 KW 24V MPPT AKILLI İNVERTER", 284.87),
+            ("GES", "VIGOR", "12V 100AH JEL AKÜ", 129.41),
+            ("GES", "DEYE", "DEYE 5 KW STRING", 515.71),
+            ("GES", "DEYE", "DEYE 10KW TRIFAZE HV HİBRİT", 1719.03)
+        ]
+        for u in urunler_listesi:
+            conn.execute("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?,?,?,?)", u)
+        conn.commit()
+        conn.close()
+        st.success("Ürünler başarıyla eklendi!")
+        st.rerun()
 c1, c2 = st.columns([2, 1])
 
 with c1:
