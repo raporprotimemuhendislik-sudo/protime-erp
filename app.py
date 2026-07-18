@@ -1,12 +1,8 @@
 import streamlit as st
 import requests
 from datetime import datetime
+from zoneinfo import ZoneInfo  # Türkiye saati için
 import sqlite3
-import io
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
 
 # ----------------------------------------------------
 # 1. SAYFA VE TASARIM AYARLARI
@@ -22,7 +18,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ----------------------------------------------------
-# 2. VERİTABANI VE KUR MOTORU (FRAGMENT)
+# 2. VERİTABANI VE KUR MOTORU (TR SAATİ ENTEGRE)
 # ----------------------------------------------------
 def get_db_connection():
     return sqlite3.connect("protime_erp_web.db", check_same_thread=False, timeout=30)
@@ -36,10 +32,12 @@ def kur_gostergesi_fragment():
         kur = 34.50
     
     st.session_state.usd_kuru = kur
-    saat = datetime.now().strftime('%H:%M:%S')
+    
+    # Türkiye saatini al (Europe/Istanbul)
+    tr_saat = datetime.now(ZoneInfo("Europe/Istanbul")).strftime('%H:%M:%S')
     
     st.metric(label="📊 CANLI REEL USD/TL KURU", value=f"{kur:.4f} TL")
-    st.caption(f"Güncelleme: {saat} | Sistem Saati: {saat}")
+    st.caption(f"Güncelleme (TR): {tr_saat}")
 
 def veritabanı_hazırla():
     conn = get_db_connection()
@@ -67,11 +65,12 @@ with st.sidebar:
 st.title(f"PROTIME ERP // {aktif_modul} İSTASYONU")
 
 # ----------------------------------------------------
-# 4. KATALOG VE İŞLEMLER
+# 4. KATALOG, EKLEME VE İŞLEMLER
 # ----------------------------------------------------
 col1, col2 = st.columns([2, 1])
 
 with col1:
+    st.subheader("📦 Katalog Ürünleri")
     conn = get_db_connection()
     rows = conn.execute("SELECT id, marka, urun_adi, nakit_usd, kdv_usd FROM urunler WHERE modul=?", (aktif_modul,)).fetchall()
     conn.close()
@@ -85,33 +84,33 @@ with col1:
                 st.session_state.paket.append({"marka": x["Marka"], "urun": x["Ürün"], "n_usd": x["Nakit ($)"], "k_usd": x["KDV'li ($)"]})
         st.rerun()
 
+with col2:
+    st.subheader("➕ Yeni Ürün Ekle")
+    with st.form("yeni_urun_form", clear_on_submit=True):
+        m_marka = st.text_input("Marka")
+        m_tanim = st.text_input("Ürün Tanımı")
+        m_fiyat = st.number_input("Nakit Fiyat ($)", min_value=0.0, step=1.0)
+        if st.form_submit_button("Veritabanına Kaydet"):
+            if m_marka and m_tanim and m_fiyat > 0:
+                conn = get_db_connection()
+                conn.execute("INSERT INTO urunler (modul, marka, urun_adi, nakit_usd, kdv_usd) VALUES (?, ?, ?, ?, ?)", 
+                             (aktif_modul, m_marka, m_tanim, m_fiyat, m_fiyat * 1.20))
+                conn.commit()
+                conn.close()
+                st.rerun()
+
 # ----------------------------------------------------
 # 5. FİNANSAL HAKEDİŞ
 # ----------------------------------------------------
 st.subheader("📊 Aktif Proje Finansal Hakediş")
 if st.session_state.paket:
-    t_n, t_k = 0, 0
+    t_n = 0
     for item in st.session_state.paket:
         t_n += item["n_usd"]
-        t_k += item["k_usd"]
-        st.write(f"✅ **{item['marka']}** - {item['urun']} | **{item['n_usd']*st.session_state.usd_kuru:,.2f} TL**")
+        st.write(f"✅ **{item['marka']}** - {item['urun']} | **{(item['n_usd']*st.session_state.usd_kuru):,.2f} TL**")
     
     st.info(f"💰 Toplam Matrah: ${t_n:,.2f} // Güncel Kur ile: {(t_n*st.session_state.usd_kuru):,.2f} TL")
     
     if st.button("🗑️ Proje Havuzunu Sıfırla"):
         st.session_state.paket = []
         st.rerun()
-else:
-    st.write("Proje havuzunda henüz ürün bulunmuyor.")
-
-# ----------------------------------------------------
-# 6. AJANDA
-# ----------------------------------------------------
-st.subheader("📝 Mühendislik Ajandası")
-yeni_not = st.text_input("Not ekle:")
-if st.button("Notu Kaydet"):
-    conn = get_db_connection()
-    conn.execute("INSERT INTO notlar (not_icerik, tarih) VALUES (?, ?)", (yeni_not, datetime.now().strftime('%d.%m.%Y')))
-    conn.commit()
-    conn.close()
-    st.rerun()
