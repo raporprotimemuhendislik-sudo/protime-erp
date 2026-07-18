@@ -1,5 +1,4 @@
 import streamlit as st
-import requests
 import sqlite3
 import io
 from reportlab.lib.pagesizes import A4
@@ -9,61 +8,55 @@ from reportlab.lib import colors
 
 st.set_page_config(page_title="PROTIME ERP", layout="wide")
 
-# --- VERİTABANI ---
-def get_db_connection():
-    return sqlite3.connect("protime_erp_final.db", check_same_thread=False)
+# Veritabanı kurulumu
+def get_db():
+    db = sqlite3.connect("protime_yeni_sistem.db", check_same_thread=False)
+    return db
 
-conn = get_db_connection()
-# 'durum' sütunu eklendi: 0 = Bekleyen, 1 = Kabul Edilen (Yapılacak)
-conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
-conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT, durum INTEGER DEFAULT 0)")
-conn.commit(); conn.close()
+conn = get_db()
+conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
+conn.execute("CREATE TABLE IF NOT EXISTS isler (id INTEGER PRIMARY KEY, tanim TEXT, durum INTEGER)") # 0:Bekleyen, 1:Yapılacak
+conn.commit()
+conn.close()
 
-# --- PDF OLUŞTURMA (Aynı kalıyor) ---
-def pdf_olustur(paket, toplam, birim, kur=None):
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    styles = getSampleStyleSheet()
-    elements = [Paragraph("PROTIME FIYAT LISTESI", styles['Title'])]
-    data = [["Marka", "Urun", "Fiyat"]]
-    for item in paket:
-        data.append([item['marka'], item['urun'], f"{item['fiyat']:.2f} {birim}"])
-    data.append(["", "TOPLAM", f"{toplam:,.2f} {birim}"])
-    if kur: data.append(["", "TOPLAM TL", f"{(toplam*kur):,.2f} TL"])
-    table = Table(data, colWidths=[150, 200, 100])
-    table.setStyle(TableStyle([('GRID', (0,0), (-1,-1), 0.5, colors.black), ('BACKGROUND', (0,0), (-1,0), colors.lightgrey)]))
-    elements.append(table)
-    doc.build(elements)
-    return buffer
+# PDF temizleme
+def temizle(t):
+    return str(t).replace('İ','I').replace('ı','i').replace('Ş','S').replace('ş','s').replace('Ç','C').replace('ç','c').replace('Ğ','G').replace('ğ','g').replace('Ü','U').replace('ü','u').replace('Ö','O').replace('ö','o')
 
-# --- YAN MENÜ ---
+# Yan Menü: İş Takibi
 with st.sidebar:
-    st.title("PROTIME MÜHENDİSLİK")
-    
     st.subheader("📌 BEKLEYEN İŞLER")
-    yeni_is = st.text_input("Yeni iş girin...", key="yeni_is")
-    if st.button("Bekleyenlere Ekle") and yeni_is:
-        conn = get_db_connection()
-        conn.execute("INSERT INTO yapılacaklar (is_tanimi, durum) VALUES (?, 0)", (yeni_is,))
-        conn.commit(); conn.close(); st.rerun()
+    yeni = st.text_input("Yeni iş girin")
+    if st.button("Ekle") and yeni:
+        c = get_db(); c.execute("INSERT INTO isler (tanim, durum) VALUES (?, 0)", (yeni,)); c.commit(); c.close(); st.rerun()
     
-    conn = get_db_connection()
-    bekleyenler = conn.execute("SELECT id, is_tanimi FROM yapılacaklar WHERE durum=0").fetchall()
-    for row in bekleyenler:
-        c1, c2 = st.columns([4, 1])
-        c1.write(f"⏳ {row[1]}")
-        if c2.button("✅ Kabul Et", key=f"kabul_{row[0]}"):
-            conn.execute("UPDATE yapılacaklar SET durum=1 WHERE id=?", (row[0],)); conn.commit(); st.rerun()
+    c = get_db()
+    for row in c.execute("SELECT id, tanim FROM isler WHERE durum=0").fetchall():
+        col1, col2 = st.columns([3,1])
+        col1.write(row[1])
+        if col2.button("✅", key=f"b_{row[0]}"): c.execute("UPDATE isler SET durum=1 WHERE id=?", (row[0],)); c.commit(); st.rerun()
     
     st.write("---")
     st.subheader("📋 YAPILACAK İŞLER")
-    yapilacaklar = conn.execute("SELECT id, is_tanimi FROM yapılacaklar WHERE durum=1").fetchall()
-    for row in yapilacaklar:
-        c1, c2 = st.columns([4, 1])
-        c1.write(f"✅ {row[1]}")
-        if c2.button("❌", key=f"sil_{row[0]}"):
-            conn.execute("DELETE FROM yapılacaklar WHERE id=?", (row[0],)); conn.commit(); st.rerun()
-    conn.close()
+    for row in c.execute("SELECT id, tanim FROM isler WHERE durum=1").fetchall():
+        col1, col2 = st.columns([3,1])
+        col1.write(row[1])
+        if col2.button("❌", key=f"y_{row[0]}"): c.execute("DELETE FROM isler WHERE id=?", (row[0],)); c.commit(); st.rerun()
+    c.close()
 
-# --- ANA İÇERİK ---
-# ... (Ürün Katalog ve Hakediş kısımları aynı kalıyor) ...
+# Ana Sayfa
+tab1, tab2 = st.tabs(["☀️ GES (USD)", "⚡ ELEKTRİK (TL)"])
+modul = "GES" if tab1 else "ELEKTRIK"
+
+with tab1 if modul == "GES" else tab2:
+    st.header(f"{modul} Kataloğu")
+    c = get_db()
+    # Ekleme formu
+    with st.form("ekle"):
+        m, u, f = st.text_input("Marka"), st.text_input("Ürün"), st.number_input("Fiyat")
+        if st.form_submit_button("Ürün Kaydet"): c.execute("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?,?,?,?)", (modul, m, u, f)); c.commit(); st.rerun()
+    
+    # Katalog
+    for r in c.execute("SELECT id, marka, urun_adi, fiyat FROM urunler WHERE modul=?", (modul,)).fetchall():
+        st.write(f"{r[1]} - {r[2]} : {r[3]}")
+    c.close()
