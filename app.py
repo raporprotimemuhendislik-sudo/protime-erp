@@ -19,18 +19,26 @@ conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY A
 conn.commit(); conn.close()
 
 # --- PDF OLUŞTURMA ---
+# --- PDF OLUŞTURMA ---
 def pdf_olustur(paket, toplam, baslik, birim, kur=None):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()
-    elements = [Paragraph(baslik, styles['Title'])]
+    
+    # Başlık "PROTİME FİYAT LİSTESİ" olarak güncellendi
+    elements = [Paragraph("PROTİME FİYAT LİSTESİ", styles['Title'])]
+    
     data = [["Marka", "Ürün", "Fiyat"]]
     for item in paket:
         data.append([item['marka'], item['urun'], f"{item['fiyat']:.2f} {birim}"])
     data.append(["", "TOPLAM", f"{toplam:,.2f} {birim}"])
     if kur: data.append(["", "TOPLAM TL", f"{(toplam*kur):,.2f} TL"])
+    
     table = Table(data, colWidths=[150, 200, 100])
-    table.setStyle(TableStyle([('GRID', (0,0), (-1,-1), 0.5, colors.black), ('BACKGROUND', (0,0), (-1,0), colors.lightgrey)]))
+    table.setStyle(TableStyle([
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black), 
+        ('BACKGROUND', (0,0), (-1,0), colors.lightgrey)
+    ]))
     elements.append(table)
     doc.build(elements)
     return buffer
