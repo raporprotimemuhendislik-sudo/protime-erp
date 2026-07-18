@@ -12,7 +12,6 @@ st.set_page_config(page_title="PROTIME ERP", layout="wide")
 # --- VERİTABANI ---
 def get_db_connection():
     conn = sqlite3.connect("protime_erp_final.db", check_same_thread=False)
-    # Tablo adını değiştirdik (yapılacaklar -> yapılacaklar_v2)
     conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
     conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar_v2 (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT, durum INTEGER DEFAULT 0)")
     return conn
@@ -47,10 +46,19 @@ if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = [
 # --- YAN MENÜ ---
 with st.sidebar:
     st.title("PROTIME MÜHENDİSLİK")
+    try:
+        res = requests.get("https://api.frankfurter.app/latest?from=USD&to=TRY", timeout=2)
+        st.session_state.usd_kuru = float(res.json()["rates"]["TRY"])
+    except: st.session_state.usd_kuru = 34.50
+    st.metric("📊 CANLI USD/TL", f"{st.session_state.usd_kuru:.4f}")
     
-    # 1. BEKLEYEN İŞLER
+    secim = st.radio("DEPARTMAN", ["☀️ GES (USD)", "⚡ ELEKTRİK (TL)"])
+    aktif_modul = "GES" if "GES" in secim else "ELEKTRIK"
+    aktif_paket = st.session_state.paket_GES if aktif_modul == "GES" else st.session_state.paket_ELEKTRIK
+    
+    st.write("---")
     st.subheader("⏳ BEKLEYEN İŞLER")
-    yeni_is = st.text_input("Yeni iş ekle...")
+    yeni_is = st.text_input("Yeni iş ekle...", key="yeni_is")
     if st.button("Ekle") and yeni_is:
         conn = get_db_connection()
         conn.execute("INSERT INTO yapılacaklar_v2 (is_tanimi, durum) VALUES (?, 0)", (yeni_is,))
@@ -64,7 +72,6 @@ with st.sidebar:
         if c2.button("✅", key=f"bekleyen_{row[0]}"):
             conn.execute("UPDATE yapılacaklar_v2 SET durum=1 WHERE id=?", (row[0],)); conn.commit(); st.rerun()
 
-    # 2. YAPILACAK İŞLER
     st.write("---")
     st.subheader("📋 YAPILACAK İŞLER")
     yapilacaklar = conn.execute("SELECT id, is_tanimi FROM yapılacaklar_v2 WHERE durum=1").fetchall()
@@ -76,9 +83,6 @@ with st.sidebar:
     conn.close()
 
 # --- ANA İÇERİK ---
-aktif_modul = "GES" if "GES" in st.radio("DEPARTMAN", ["☀️ GES (USD)", "⚡ ELEKTRİK (TL)"]) else "ELEKTRIK"
-aktif_paket = st.session_state.paket_GES if aktif_modul == "GES" else st.session_state.paket_ELEKTRIK
-
 st.title(f"{aktif_modul} İSTASYONU")
 arama = st.text_input("🔍 Ürün veya marka ara...")
 c1, c2 = st.columns([2, 1])
@@ -92,6 +96,8 @@ with c1:
             cols = st.columns([3, 2, 1, 1])
             cols[0].write(f"{r[1]} - {r[2]}")
             cols[1].write(f"{r[3]} {'$' if aktif_modul=='GES' else 'TL'}")
+            if cols[2].button("🗑️", key=f"del_{r[0]}"):
+                conn.execute("DELETE FROM urunler WHERE id=?", (r[0],)); conn.commit(); st.rerun()
             if cols[3].button("➕", key=f"add_{r[0]}"):
                 aktif_paket.append({"marka": r[1], "urun": r[2], "fiyat": r[3]})
                 st.rerun()
@@ -105,3 +111,23 @@ with c2:
             conn = get_db_connection()
             conn.execute("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?,?,?,?)", (aktif_modul, m, t, f))
             conn.commit(); conn.close(); st.rerun()
+
+# --- HAKEDİŞ ---
+st.subheader(f"📊 {aktif_modul} Hakediş Paketi")
+if aktif_paket:
+    toplam = sum(i["fiyat"] for i in aktif_paket)
+    for i, item in enumerate(aktif_paket):
+        st.write(f"✅ {item['marka']} | {item['urun']} | {item['fiyat']}")
+    
+    if aktif_modul == "GES":
+        st.info(f"💰 TOPLAM: ${toplam:,.2f} | ₺{(toplam * st.session_state.usd_kuru):,.2f} TL")
+    else:
+        st.info(f"💰 TOPLAM: {toplam:,.2f} TL")
+        
+    kur_val = st.session_state.usd_kuru if aktif_modul == "GES" else None
+    pdf_buf = pdf_olustur(aktif_paket, toplam, "$" if aktif_modul == "GES" else "TL", kur_val)
+    st.download_button("📄 PDF İNDİR", pdf_buf, "hakedis.pdf", "application/pdf")
+    if st.button("Listeyi Temizle"):
+        if aktif_modul == "GES": st.session_state.paket_GES = []
+        else: st.session_state.paket_ELEKTRIK = []
+        st.rerun()
