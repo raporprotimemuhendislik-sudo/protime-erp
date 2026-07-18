@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import sqlite3
 import io
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet
@@ -39,6 +41,7 @@ def pdf_olustur(paket, toplam, baslik, birim, kur=None):
 
 # --- SESSION ---
 if "usd_kuru" not in st.session_state: st.session_state.usd_kuru = 34.50
+if "kur_zaman" not in st.session_state: st.session_state.kur_zaman = "Henüz çekilmedi"
 if "paket_GES" not in st.session_state: st.session_state.paket_GES = []
 if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = []
 
@@ -48,8 +51,12 @@ with st.sidebar:
     try:
         res = requests.get("https://api.frankfurter.app/latest?from=USD&to=TRY", timeout=3)
         st.session_state.usd_kuru = float(res.json()["rates"]["TRY"])
-    except: st.session_state.usd_kuru = 34.50
+        st.session_state.kur_zaman = datetime.now(ZoneInfo("Europe/Istanbul")).strftime("%H:%M:%S")
+    except: 
+        st.session_state.usd_kuru = 34.50
+    
     st.metric("📊 CANLI USD/TL", f"{st.session_state.usd_kuru:.4f}")
+    st.caption(f"🕒 Son Güncelleme: {st.session_state.kur_zaman}")
     
     st.write("---")
     secim = st.radio("DEPARTMAN", ["☀️ GES (USD)", "⚡ ELEKTRİK (TL)"])
@@ -62,7 +69,9 @@ with st.sidebar:
     if st.button("İşi Ekle") and yeni_is:
         conn = get_db_connection()
         conn.execute("INSERT INTO yapılacaklar (is_tanimi) VALUES (?)", (yeni_is,))
-        conn.commit(); conn.close(); st.rerun()
+        conn.commit(); conn.close()
+        st.toast("✅ İş başarıyla eklendi!", icon="🎉") # Bildirim
+        st.rerun()
     
     conn = get_db_connection()
     isler = conn.execute("SELECT id, is_tanimi FROM yapılacaklar").fetchall()
@@ -107,21 +116,17 @@ st.subheader(f"📊 {aktif_modul} Finansal Hakediş")
 if aktif_paket:
     toplam = sum(i["fiyat"] for i in aktif_paket)
     birim = "$" if aktif_modul == "GES" else "TL"
-    
     for item in aktif_paket:
         st.write(f"✅ {item['marka']} | {item['urun']} | {item['fiyat']} {birim}")
     
-    # GES ise TL karşılığını göster
     if aktif_modul == "GES":
         st.info(f"💰 TOPLAM: ${toplam:,.2f} | ₺{(toplam * st.session_state.usd_kuru):,.2f} TL")
     else:
         st.info(f"💰 TOPLAM: {toplam:,.2f} TL")
     
     col_pdf, col_temiz = st.columns(2)
-    # Rapor oluştururken GES için kur parametresini ekle
     kur_param = st.session_state.usd_kuru if aktif_modul == "GES" else None
     pdf_buffer = pdf_olustur(aktif_paket, toplam, f"{aktif_modul} Raporu", birim, kur_param)
-    
     col_pdf.download_button("📄 PDF İNDİR", pdf_buffer, "rapor.pdf", "application/pdf")
     if col_temiz.button("🗑️ Listeyi Temizle"):
         if aktif_modul == "GES": st.session_state.paket_GES = []
