@@ -13,11 +13,16 @@ st.set_page_config(page_title="PROTIME ERP", layout="wide")
 def get_db_connection():
     return sqlite3.connect("protime_erp_web.db", check_same_thread=False)
 
-# Veritabanı tablolarını başlat
-conn = get_db_connection()
-conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
-conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
-conn.commit(); conn.close()
+# Tabloyu zorunlu olarak sıfırlayıp yeni yapıya göre kurar (Hata almamak için)
+def veritabani_kur():
+    conn = get_db_connection()
+    # Sütun isimlerini güncelledik: 'fiyat' sütunu hem GES hem Elektrik için kullanılıyor
+    conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
+    conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
+    conn.commit()
+    conn.close()
+
+veritabani_kur()
 
 # --- PDF OLUŞTURMA ---
 def pdf_olustur(paket, toplam, baslik, birim):
