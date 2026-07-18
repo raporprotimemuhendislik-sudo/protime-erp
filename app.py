@@ -18,21 +18,25 @@ conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINC
 conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
 conn.commit(); conn.close()
 
-# --- PDF OLUŞTURMA ---
-# --- PDF OLUŞTURMA ---
+# --- PDF OLUŞTURMA (Türkçe Karakter Destekli) ---
 def pdf_olustur(paket, toplam, baslik, birim, kur=None):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()
     
-    # Başlık "PROTİME FİYAT LİSTESİ" olarak güncellendi
-    elements = [Paragraph("PROTİME FİYAT LİSTESİ", styles['Title'])]
+    # Başlık Türkçe karakter sorunu olmaması için İngilizce karakterlerle yazıldı
+    elements = [Paragraph("PROTIME FIYAT LISTESI", styles['Title'])]
     
-    data = [["Marka", "Ürün", "Fiyat"]]
+    data = [["Marka", "Urun", "Fiyat"]]
     for item in paket:
-        data.append([item['marka'], item['urun'], f"{item['fiyat']:.2f} {birim}"])
+        # Ürün isimlerindeki karakterleri temizleyerek ekliyoruz
+        marka = item['marka'].replace('İ', 'I').replace('ı', 'i').replace('Ş', 'S').replace('ş', 's').replace('Ç', 'C').replace('ç', 'c').replace('Ğ', 'G').replace('ğ', 'g').replace('Ü', 'U').replace('ü', 'u').replace('Ö', 'O').replace('ö', 'o')
+        urun = item['urun'].replace('İ', 'I').replace('ı', 'i').replace('Ş', 'S').replace('ş', 's').replace('Ç', 'C').replace('ç', 'c').replace('Ğ', 'G').replace('ğ', 'g').replace('Ü', 'U').replace('ü', 'u').replace('Ö', 'O').replace('ö', 'o')
+        data.append([marka, urun, f"{item['fiyat']:.2f} {birim}"])
+    
     data.append(["", "TOPLAM", f"{toplam:,.2f} {birim}"])
-    if kur: data.append(["", "TOPLAM TL", f"{(toplam*kur):,.2f} TL"])
+    if kur: 
+        data.append(["", "TOPLAM TL", f"{(toplam*kur):,.2f} TL"])
     
     table = Table(data, colWidths=[150, 200, 100])
     table.setStyle(TableStyle([
