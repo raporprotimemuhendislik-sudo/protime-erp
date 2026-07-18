@@ -29,7 +29,6 @@ def kur_gostergesi_fragment():
         kur = float(res.json()["rates"]["TRY"])
     except:
         kur = 34.50
-    
     st.session_state.usd_kuru = kur
     tr_saat = datetime.now(ZoneInfo("Europe/Istanbul")).strftime('%H:%M:%S')
     st.metric(label="📊 CANLI REEL USD/TL KURU", value=f"{kur:.4f} TL")
@@ -38,7 +37,8 @@ def kur_gostergesi_fragment():
 def veritabanı_hazırla():
     conn = get_db_connection()
     c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, nakit_usd REAL, kdv_usd REAL)")
+    c.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, nakit_usd REAL)")
+    c.execute("CREATE TABLE IF NOT EXISTS yapılacaklar (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT)")
     conn.commit()
     conn.close()
 
@@ -48,7 +48,7 @@ if "usd_kuru" not in st.session_state: st.session_state.usd_kuru = 34.50
 if "paket" not in st.session_state: st.session_state.paket = []
 
 # ----------------------------------------------------
-# 3. YAN NAVİGASYON
+# 3. YAN NAVİGASYON (GÜNCELLENMİŞ)
 # ----------------------------------------------------
 with st.sidebar:
     st.title("PROTIME MÜHENDİSLİK")
@@ -56,30 +56,47 @@ with st.sidebar:
     aktif_modul = "GES" if "GES" in modul else "ELEKTRIK"
     st.write("---")
     kur_gostergesi_fragment()
+    
+    st.write("---")
+    st.subheader("📌 YAPILACAK İŞLER")
+    yeni_is = st.text_input("Yeni iş ekle...")
+    if st.button("İşi Ekle"):
+        if yeni_is:
+            conn = get_db_connection()
+            conn.execute("INSERT INTO yapılacaklar (is_tanimi) VALUES (?)", (yeni_is,))
+            conn.commit()
+            conn.close()
+            st.rerun()
+            
+    # Yapılacaklar listesi ve Kırmızı Uyarı
+    conn = get_db_connection()
+    isler = conn.execute("SELECT is_tanimi FROM yapılacaklar").fetchall()
+    conn.close()
+    
+    if isler:
+        st.error(f"⚠️ {len(isler)} Adet Bekleyen İş Var!") # Kırmızı Bildirim
+        for i in isler:
+            st.write(f"- {i[0]}")
 
 # ----------------------------------------------------
-# 4. ANA İÇERİK (KATALOG + EKLEME + HAKEDİŞ)
+# 4. ANA İÇERİK
 # ----------------------------------------------------
 st.title(f"PROTIME ERP // {aktif_modul} İSTASYONU")
 col1, col2 = st.columns([2, 1])
 
-# KATALOG LİSTESİ
 with col1:
     st.subheader("📦 Katalog Ürünleri")
     conn = get_db_connection()
     rows = conn.execute("SELECT id, marka, urun_adi, nakit_usd FROM urunler WHERE modul=?", (aktif_modul,)).fetchall()
     conn.close()
-    
     data = [{"Seç": False, "ID": r[0], "Marka": r[1], "Ürün": r[2], "Fiyat ($)": r[3]} for r in rows]
     edited = st.data_editor(data, use_container_width=True)
-    
     if st.button("📥 SEÇİLİLERİ PROJEYE EKLE"):
         for x in edited:
             if x["Seç"]:
                 st.session_state.paket.append({"marka": x["Marka"], "urun": x["Ürün"], "n_usd": x["Fiyat ($)"]})
         st.rerun()
 
-# ÜRÜN EKLEME FORMU
 with col2:
     st.subheader("➕ Yeni Ürün Ekle")
     with st.form("yeni_urun_form", clear_on_submit=True):
@@ -89,21 +106,7 @@ with col2:
         if st.form_submit_button("Veritabanına Kaydet"):
             if m_marka and m_tanim and m_fiyat > 0:
                 conn = get_db_connection()
-                conn.execute("INSERT INTO urunler (modul, marka, urun_adi, nakit_usd) VALUES (?, ?, ?, ?)", 
-                             (aktif_modul, m_marka, m_tanim, m_fiyat))
+                conn.execute("INSERT INTO urunler (modul, marka, urun_adi, nakit_usd) VALUES (?, ?, ?, ?)", (aktif_modul, m_marka, m_tanim, m_fiyat))
                 conn.commit()
                 conn.close()
                 st.rerun()
-
-# HAKEDİŞ
-st.subheader("📊 Aktif Proje Finansal Hakediş")
-if st.session_state.paket:
-    t_n = 0
-    for item in st.session_state.paket:
-        t_n += item["n_usd"]
-        st.write(f"✅ **{item['marka']}** - {item['urun']} | **{(item['n_usd']*st.session_state.usd_kuru):,.2f} TL**")
-    st.info(f"💰 Toplam Matrah: ${t_n:,.2f} // Güncel Kur ile: {(t_n*st.session_state.usd_kuru):,.2f} TL")
-    if st.button("🗑️ Proje Havuzunu Sıfırla"):
-        st.session_state.paket = []
-        st.rerun()
-    
