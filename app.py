@@ -16,7 +16,7 @@ def get_db_connection():
     conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar_v2 (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT, durum INTEGER DEFAULT 0)")
     return conn
 
-# --- BAŞLANGIÇ VERİLERİNİ YÜKLEME (GES VE ELEKTRİK KATALOĞU) ---
+# --- BAŞLANGIÇ VERİLERİNİ GÜNCELLEME VE YÜKLEME ---
 def katalog_urunlerini_ekle():
     conn = get_db_connection()
     
@@ -131,82 +131,82 @@ def katalog_urunlerini_ekle():
         conn.executemany("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?, ?, ?, ?)", ges_urunleri)
         conn.commit()
 
-    # Elektrik Ürünleri Kontrolü ve Yüklemesi
-    sayi_elektrk = conn.execute("SELECT COUNT(*) FROM urunler WHERE modul='ELEKTRIK'").fetchone()[0]
-    if sayi_elektrk == 0:
-        zeybek_urunleri = [
-            ("ELEKTRIK", "Cata", "Ct-5223 Pars Kare Spot Siyah Kasa", 57.82),
-            ("ELEKTRIK", "Cata", "Ct-4221 3W Led Kapsül Ampul G9 220V / Günışığı", 36.70),
-            ("ELEKTRIK", "Cata", "Ct-4222 4W Led Kapsül Ampul G9 220V / Günışığı", 52.79),
-            ("ELEKTRIK", "Ledrox", "Hologram Fan 100 Cm 3D Video", 45600.00),
-            ("ELEKTRIK", "Ledrox", "Hologram Fan 65 Cm 3D Video", 25200.00),
-            ("ELEKTRIK", "Ledrox", "Hologram Fan 42 Cm 3D Video", 4500.00),
-            ("ELEKTRIK", "Cata", "Ct-5224 Pars Yuvarlak Siyah Kasa", 57.82),
-            ("ELEKTRIK", "Cata", "Ct-5258 6W Zebra Led Armatür (Siyah-Krom Kasa) 3 Renk", 40.22),
-            ("ELEKTRIK", "Cata", "Ct-4041 Etna Güç Kaynağı 300W", 5028.00),
-            ("ELEKTRIK", "Cata", "Ct-8640 Zen Sarkıt Led Armatür", 4022.40),
-            ("ELEKTRIK", "Cata", "Ct-7313 Nepal Solar Set Üstü 50W", 754.20),
-            ("ELEKTRIK", "Cata", "Ct-5333 30W Babil Ray Tipi Led Armatür Beyaz Kasa / Günışığı", 138.27),
-            ("ELEKTRIK", "Cata", "Ct-4650 300W Amazon Solar Led Projektör", 2262.60),
-            ("ELEKTRIK", "Cata", "Ct-5110 Tezgah Altı Priz Siyah Kasa / Günışığı", 263.97),
-            ("ELEKTRIK", "Cata", "Ct-4694 6W Gold Wallwasher 20 Cm / Amber", 628.50),
-            ("ELEKTRIK", "Cata", "Ct-3012 Kristal Led Tavan Armatür", 2891.10),
-            ("ELEKTRIK", "Fujiled", "12V COB Şerit Led 4000K 288 Ledli", 94.60),
-            ("ELEKTRIK", "Fujiled", "12V COB Şerit Led Günışığı 288 Ledli", 94.60),
-            ("ELEKTRIK", "Viko", "Karre Anahtar Beyaz - Çerçevesiz", 78.34),
-            ("ELEKTRIK", "Viko", "Karre Çocuk Korumalı Topraklı Priz Beyaz - Çerçevesiz", 128.11),
-            ("ELEKTRIK", "Viko", "Karre Kapaklı Topraklı Çocuk Korumalı Priz - Çerçevesiz", 138.72),
-            ("ELEKTRIK", "Viko", "Karre Dimmer 600W Beyaz - Çerçevesiz", 514.90),
-            ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 2x1.5 mm", 1250.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 2x2.5 mm", 1950.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x1.5 mm", 1750.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x2.5 mm", 2800.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x4 mm", 4350.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 4x1.5 mm", 2350.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 4x2.5 mm", 3750.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 1.5 mm", 650.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 2.5 mm", 1050.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 4 mm", 1680.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 6 mm", 2500.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYY Yeraltı Kablosu 3x1.5 mm", 2100.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYY Yeraltı Kablosu 3x2.5 mm", 3250.00),
-            ("ELEKTRIK", "Öznur Kablo", "NYY Yeraltı Kablosu 4x4 mm", 5900.00),
-            ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x4 mm² Solar Kablo (Kırmızı)", 14.50),
-            ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x4 mm² Solar Kablo (Siyah)", 14.50),
-            ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x6 mm² Solar Kablo (Kırmızı)", 21.00),
-            ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x6 mm² Solar Kablo (Siyah)", 21.00),
-            ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 2.5 x 100 mm (100'lü Paket)", 45.00),
-            ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 3.6 x 200 mm (100'lü Paket)", 95.00),
-            ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 4.8 x 300 mm (100'lü Paket)", 185.00),
-            ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 4.8 x 350 mm (100'lü Paket)", 220.00),
-            ("ELEKTRIK", "Caspian", "Wago Tip 3lü Kollu Wago Klemens (50'li Paket)", 320.00),
-            ("ELEKTRIK", "Caspian", "Wago Tip 5li Kollu Wago Klemens (50'li Paket)", 480.00),
-            ("ELEKTRIK", "Caspian", "Skor Klemens / Buat Klemensi 2.5 mm² (100'lü)", 150.00),
-            ("ELEKTRIK", "Caspian", "Sıkmalı Kablo Yüksüğü 1.5 mm² (100'lü Paket)", 65.00),
-            ("ELEKTRIK", "Caspian", "Sıkmalı Kablo Yüksüğü 2.5 mm² (100'lü Paket)", 85.00),
-            ("ELEKTRIK", "Caspian", "Delikli Boru Kelepçesi 1/2 inç", 12.50),
-            ("ELEKTRIK", "Caspian", "Delikli Boru Kelepçesi 3/4 inç", 15.00),
-            ("ELEKTRIK", "Caspian", "Plastik Spiral Boru 16 mm (50 Metre Top)", 450.00),
-            ("ELEKTRIK", "Caspian", "Plastik Spiral Boru 20 mm (50 Metre Top)", 580.00),
-            ("ELEKTRIK", "Caspian", "Duvaklı / Vidalı Dubel 8 mm (100'lü Paket)", 75.00),
-            ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 2'li", 85.00),
-            ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 4'lü", 120.00),
-            ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 6'lı", 165.00),
-            ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 9'lu", 230.00),
-            ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 12'li", 310.00),
-            ("ELEKTRIK", "Kardeşler", "Sıva Altı Şeffaf Kapaklı Sigorta Kutusu 12'li", 340.00),
-            ("ELEKTRIK", "Kardeşler", "Sıva Altı Şeffaf Kapaklı Sigorta Kutusu 24'lü", 650.00),
-            ("ELEKTRIK", "Sigma", "Boş Plastik Pano 20x30x13 cm (IP65)", 420.00),
-            ("ELEKTRIK", "Sigma", "Boş Plastik Pano 30x40x17 cm (IP65)", 680.00),
-            ("ELEKTRIK", "Sigma", "Boş Plastik Pano 40x50x20 cm (IP65)", 1050.00),
-            ("ELEKTRIK", "Sigma", "Boş Plastik Pano 50x60x22 cm (IP65)", 1550.00),
-            ("ELEKTRIK", "Caspian", "Plastik Buat Kutusu 8x8 cm (Klemensli)", 35.00),
-            ("ELEKTRIK", "Caspian", "Plastik Buat Kutusu 10x10 cm (Klemensli)", 48.00),
-            ("ELEKTRIK", "Caspian", "Plastik Buat Kutusu 12x12 cm (Klemensli)", 65.00)
-        ]
-        conn.executemany("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?, ?, ?, ?)", zeybek_urunleri)
-        conn.commit()
-
+    # Elektrik Ürünlerini Güncel/Eksiksiz Ekleme (Mükerrer olmaması için tabloyu temizleyip güncel listeyi basabiliriz veya kontrol edebiliriz)
+    # Mevcut elektrik ürünlerini temizleyip en güncel tam listeyi ekleyelim ki eksik kalmasın:
+    conn.execute("DELETE FROM urunler WHERE modul='ELEKTRIK'")
+    
+    zeybek_urunleri = [
+        ("ELEKTRIK", "Cata", "Ct-5223 Pars Kare Spot Siyah Kasa", 57.82),
+        ("ELEKTRIK", "Cata", "Ct-4221 3W Led Kapsül Ampul G9 220V / Günışığı", 36.70),
+        ("ELEKTRIK", "Cata", "Ct-4222 4W Led Kapsül Ampul G9 220V / Günışığı", 52.79),
+        ("ELEKTRIK", "Ledrox", "Hologram Fan 100 Cm 3D Video", 45600.00),
+        ("ELEKTRIK", "Ledrox", "Hologram Fan 65 Cm 3D Video", 25200.00),
+        ("ELEKTRIK", "Ledrox", "Hologram Fan 42 Cm 3D Video", 4500.00),
+        ("ELEKTRIK", "Cata", "Ct-5224 Pars Yuvarlak Siyah Kasa", 57.82),
+        ("ELEKTRIK", "Cata", "Ct-5258 6W Zebra Led Armatür (Siyah-Krom Kasa) 3 Renk", 40.22),
+        ("ELEKTRIK", "Cata", "Ct-4041 Etna Güç Kaynağı 300W", 5028.00),
+        ("ELEKTRIK", "Cata", "Ct-8640 Zen Sarkıt Led Armatür", 4022.40),
+        ("ELEKTRIK", "Cata", "Ct-7313 Nepal Solar Set Üstü 50W", 754.20),
+        ("ELEKTRIK", "Cata", "Ct-5333 30W Babil Ray Tipi Led Armatür Beyaz Kasa / Günışığı", 138.27),
+        ("ELEKTRIK", "Cata", "Ct-4650 300W Amazon Solar Led Projektör", 2262.60),
+        ("ELEKTRIK", "Cata", "Ct-5110 Tezgah Altı Priz Siyah Kasa / Günışığı", 263.97),
+        ("ELEKTRIK", "Cata", "Ct-4694 6W Gold Wallwasher 20 Cm / Amber", 628.50),
+        ("ELEKTRIK", "Cata", "Ct-3012 Kristal Led Tavan Armatür", 2891.10),
+        ("ELEKTRIK", "Fujiled", "12V COB Şerit Led 4000K 288 Ledli", 94.60),
+        ("ELEKTRIK", "Fujiled", "12V COB Şerit Led Günışığı 288 Ledli", 94.60),
+        ("ELEKTRIK", "Viko", "Karre Anahtar Beyaz - Çerçevesiz", 78.34),
+        ("ELEKTRIK", "Viko", "Karre Çocuk Korumalı Topraklı Priz Beyaz - Çerçevesiz", 128.11),
+        ("ELEKTRIK", "Viko", "Karre Kapaklı Topraklı Çocuk Korumalı Priz - Çerçevesiz", 138.72),
+        ("ELEKTRIK", "Viko", "Karre Dimmer 600W Beyaz - Çerçevesiz", 514.90),
+        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 2x1.5 mm", 1250.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 2x2.5 mm", 1950.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x1.5 mm", 1750.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x2.5 mm", 2800.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x4 mm", 4350.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 4x1.5 mm", 2350.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 4x2.5 mm", 3750.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 1.5 mm", 650.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 2.5 mm", 1050.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 4 mm", 1680.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 6 mm", 2500.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYY Yeraltı Kablosu 3x1.5 mm", 2100.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYY Yeraltı Kablosu 3x2.5 mm", 3250.00),
+        ("ELEKTRIK", "Öznur Kablo", "NYY Yeraltı Kablosu 4x4 mm", 5900.00),
+        ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x4 mm² Solar Kablo (Kırmızı)", 14.50),
+        ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x4 mm² Solar Kablo (Siyah)", 14.50),
+        ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x6 mm² Solar Kablo (Kırmızı)", 21.00),
+        ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x6 mm² Solar Kablo (Siyah)", 21.00),
+        ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 2.5 x 100 mm (100'lü Paket)", 45.00),
+        ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 3.6 x 200 mm (100'lü Paket)", 95.00),
+        ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 4.8 x 300 mm (100'lü Paket)", 185.00),
+        ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 4.8 x 350 mm (100'lü Paket)", 220.00),
+        ("ELEKTRIK", "Caspian", "Wago Tip 3lü Kollu Wago Klemens (50'li Paket)", 320.00),
+        ("ELEKTRIK", "Caspian", "Wago Tip 5li Kollu Wago Klemens (50'li Paket)", 480.00),
+        ("ELEKTRIK", "Caspian", "Skor Klemens / Buat Klemensi 2.5 mm² (100'lü)", 150.00),
+        ("ELEKTRIK", "Caspian", "Sıkmalı Kablo Yüksüğü 1.5 mm² (100'lü Paket)", 65.00),
+        ("ELEKTRIK", "Caspian", "Sıkmalı Kablo Yüksüğü 2.5 mm² (100'lü Paket)", 85.00),
+        ("ELEKTRIK", "Caspian", "Delikli Boru Kelepçesi 1/2 inç", 12.50),
+        ("ELEKTRIK", "Caspian", "Delikli Boru Kelepçesi 3/4 inç", 15.00),
+        ("ELEKTRIK", "Caspian", "Plastik Spiral Boru 16 mm (50 Metre Top)", 450.00),
+        ("ELEKTRIK", "Caspian", "Plastik Spiral Boru 20 mm (50 Metre Top)", 580.00),
+        ("ELEKTRIK", "Caspian", "Duvaklı / Vidalı Dubel 8 mm (100'lü Paket)", 75.00),
+        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 2'li", 85.00),
+        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 4'lü", 120.00),
+        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 6'lı", 165.00),
+        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 9'lu", 230.00),
+        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 12'li", 310.00),
+        ("ELEKTRIK", "Kardeşler", "Sıva Altı Şeffaf Kapaklı Sigorta Kutusu 12'li", 340.00),
+        ("ELEKTRIK", "Kardeşler", "Sıva Altı Şeffaf Kapaklı Sigorta Kutusu 24'lü", 650.00),
+        ("ELEKTRIK", "Sigma", "Boş Plastik Pano 20x30x13 cm (IP65)", 420.00),
+        ("ELEKTRIK", "Sigma", "Boş Plastik Pano 30x40x17 cm (IP65)", 680.00),
+        ("ELEKTRIK", "Sigma", "Boş Plastik Pano 40x50x20 cm (IP65)", 1050.00),
+        ("ELEKTRIK", "Sigma", "Boş Plastik Pano 50x60x22 cm (IP65)", 1550.00),
+        ("ELEKTRIK", "Caspian", "Plastik Buat Kutusu 8x8 cm (Klemensli)", 35.00),
+        ("ELEKTRIK", "Caspian", "Plastik Buat Kutusu 10x10 cm (Klemensli)", 48.00),
+        ("ELEKTRIK", "Caspian", "Plastik Buat Kutusu 12x12 cm (Klemensli)", 65.00)
+    ]
+    conn.executemany("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?, ?, ?, ?)", zeybek_urunleri)
+    conn.commit()
     conn.close()
 
 # Otomatik olarak katalog verilerini veritabanına işleyelim
@@ -243,7 +243,6 @@ if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = [
 with st.sidebar:
     st.title("PROTIME MÜHENDİSLİK")
     
-    # GÜÇLENDİRİLMİŞ CANLI KUR ÇEKME SİSTEMİ
     try:
         res = requests.get("https://open.er-api.com/v6/latest/USD", timeout=3)
         data_json = res.json()
