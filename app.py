@@ -16,6 +16,137 @@ def get_db_connection():
     conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar_v2 (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT, durum INTEGER DEFAULT 0)")
     return conn
 
+# --- BAŞLANGIÇ VERİLERİNİ YÜKLEME (GES KATALOĞU) ---
+def katalog_urunlerini_ekle():
+    conn = get_db_connection()
+    # Tabloda daha önce GES ürünü var mı kontrol et, yoksa katalog verilerini bas
+    sayi = conn.execute("SELECT COUNT(*) FROM urunler WHERE modul='GES'").fetchone()[0]
+    if sayi == 0:
+        ges_urunleri = [
+            # AKILLI INVERTER GRUBU
+            ("GES", "SOLINVED", "1.2 KW MPPT AKILLI İNVERTER", 132.61),
+            ("GES", "SOLINVED", "3.6KW 24V MPPT AKILLI İNVERTER", 206.28),
+            ("GES", "SOLINVED", "5 KW 24V MPPT AKILLI İNVERTER", 284.87),
+            ("GES", "SOLINVED", "6.5 KW 48V MPPT AKILLI İNVERTER", 304.51),
+            ("GES", "SOLINVED", "8.2 KW MPPT AKILLI İNVERTER", 491.15),
+            ("GES", "SOLINVED", "12 KW MPPT AKILLI İNVERTER", 589.38),
+            ("GES", "SOLINVED", "ASPENDOS SERİSİ ALL IN ONE BATERY MODULE (5kWh)", 933.19),
+            ("GES", "SOLINVED", "ASPENDOS SERİSİ ALL IN ONE INVERTER MODULE (6KW-49V)", 392.92),
+            ("GES", "NEXDOUN", "4 KW 24V MPPT AKILLI İNVERTER", 249.48),
+            ("GES", "NEXDOUN", "6 KW 48V MPPT AKILLI İNVERTER", 374.22),
+            ("GES", "MERSON", "12 KW 48V MPPT AKILLI İNVERTER", 727.65),
+            
+            # AKÜ GRUBU
+            ("GES", "VIGOR", "12V 100AH JEL AKÜ", 129.41),
+            ("GES", "SOLINVED", "12V 100Ah JEL AKÜ", 126.97),
+            ("GES", "SOLINVED", "12V 150Ah JEL AKÜ", 190.45),
+            ("GES", "SOLINVED", "12V 200Ah JEL AKÜ", 253.94),
+            ("GES", "SOLINVED", "12.8 V 100Ah LITYUM AKÜ", 270.13),
+            ("GES", "SOLINVED", "25.6 V 100Ah EFES LİTYUM AKÜ", 491.15),
+            ("GES", "SOLINVED", "25.6 V 200Ah EFES LİTYUM AKÜ", 834.96),
+            ("GES", "SOLINVED", "51,2 V 100Ah KAPADOKYA LİTYUM AKÜ", 884.07),
+            ("GES", "SOLINVED", "51.2V 100AH LİTYUMBAKÜ KABLOSU", 29.47),
+            ("GES", "SOLINVED", "51.2V 314AH HİTİT SERİSİ LİTYUM AKÜ", 2259.29),
+            ("GES", "SOLINVED", "102,4 V 100Ah Lithium Duvar Tipi - Serilenebilir", 1964.60),
+            ("GES", "SOLINVED", "XH CONTROL BOX", 884.07),
+            ("GES", "MEXSUN", "12.8V 200AH LITYUM AKU", 554.40),
+            ("GES", "MEXSUN", "12.8V 300AH LİTYUM AKÜ", 658.35),
+
+            # KAMERA & ARAÇ ŞARJ
+            ("GES", "SOLINVED", "CM04 4G KAMERA", 62.70),
+            ("GES", "SOLINVED", "CM22 WİFİ KAMERA", 70.54),
+            ("GES", "SOLINVED", "22 kW RADIUS MODEL AC CHARGER", 401.28),
+
+            # SÜRÜCÜ GRUBU
+            ("GES", "SOLINVED", "3 HP 1.5kW 150-440v 1x220", 142.43),
+            ("GES", "SOLINVED", "3 HP 2.2KW 150-440V 1X220", 225.93),
+            ("GES", "SOLINVED", "5.5HP 4KW 150-440V 1X220", 250.49),
+            ("GES", "SOLINVED", "3 HP 2.2KW 150-440V 3X220", 132.61),
+            ("GES", "SOLINVED", "5.5 HP 4KW 3X220", 196.46),
+            ("GES", "SOLINVED", "2 HP 1.5kW 250-900V", 145.87),
+            ("GES", "SOLINVED", "3 HP 2.2kW 250-900V", 152.26),
+            ("GES", "SOLINVED", "5.5 HP 4kW 250-900V", 176.81),
+            ("GES", "SOLINVED", "7.5 HP 5.5kW 250-900V", 235.75),
+            ("GES", "SOLINVED", "10 HP 7.5kW 250-900V", 255.40),
+            ("GES", "SOLINVED", "15 HP 11kW 250-900V", 333.98),
+            ("GES", "SOLINVED", "20 HP 15kW 250-900V", 373.27),
+            ("GES", "SOLINVED", "25 HP 18.5kW 250-900V", 471.50),
+            ("GES", "SOLINVED", "30 HP 22kW 250-900V", 540.27),
+            ("GES", "SOLINVED", "40 HP 30kW 250-900V", 736.73),
+            ("GES", "SOLINVED", "50 HP 37kW 250-900V", 884.07),
+            ("GES", "SOLINVED", "60 HP 45kW 250-900V", 1080.53),
+            ("GES", "SOLINVED", "70 HP 55kW 250-900V", 1276.99),
+            ("GES", "SOLINVED", "90 HP 75kW 250-900V", 1473.45),
+            ("GES", "SOLINVED", "110 HP 90kW 250-900V", 1915.49),
+            ("GES", "SOLINVED", "150 HP 110kw 250-900V", 1964.60),
+            ("GES", "SOLINVED", "160 HP 132kW 250-900V", 3045.13),
+            ("GES", "SOLINVED", "200 HP 160kW 250-900V", 3830.97),
+            ("GES", "SOLINVED", "225 HP 185kW 250-900V", 4469.47),
+            ("GES", "SOLINVED", "250 HP 200kW 250-900V", 4665.93),
+
+            # DC POMPA GRUBU
+            ("GES", "SOLINVED", "48V 750W 3.8TON 95M (2X550W)", 176.81),
+            ("GES", "SOLINVED", "48V 400W 3.8TON 47M", 166.99),
+            ("GES", "SOLINVED", "48V 500W 1.7TON 109M", 176.81),
+            ("GES", "SOLINVED", "72V 1100W 6.5TON 86M (3X550W)", 206.28),
+            ("GES", "SOLINVED", "72V 1100W 3.8TON 123M", 201.37),
+            ("GES", "SOLINVED", "96V 1500W 6TON 125M", 211.19),
+            ("GES", "SOLINVED", "96V 1500W 6.5TON 135M (4X550W)", 216.11),
+            ("GES", "SOLINVED", "110V 1300W 3.8TON 155M", 294.69),
+            ("GES", "SOLINVED", "110V 1300W 6.5TON 112M", 304.51),
+            ("GES", "SOLINVED", "AC-DC 2200W 9.5TON 125M", 314.34),
+            ("GES", "SOLINVED", "AC-DC 2200W 22TON 70M", 348.72),
+            ("GES", "SOLINVED", "AC-DC 2200W 14TON 125M", 333.98),
+            ("GES", "SOLINVED", "1HP 750W 72V MAX 20M UZAKLIK", 128.21),
+            ("GES", "SOLINVED", "1.5HP 1100W 96V MAX 17M UZAKLIK", 135.14),
+            ("GES", "SOLINVED", "2HP 1500W 110V MAX 13M UZAKLIK", 155.93),
+
+            # ON GRID İNVERTER GRUBU
+            ("GES", "DEYE", "DEYE 5 KW STRING", 515.71),
+            ("GES", "DEYE", "DEYE 8 KW STRING", 525.53),
+            ("GES", "DEYE", "DEYE 10 KW STRING", 540.27),
+            ("GES", "DEYE", "DEYE 12 KW STRING", 564.82),
+            ("GES", "DEYE", "DEYE 15 KW STRING", 776.02),
+            ("GES", "DEYE", "DEYE 20 KW STRING", 859.51),
+            ("GES", "DEYE", "DEYE 25 KW STRING", 933.19),
+            ("GES", "DEYE", "DEYE 30 KW STRING", 1129.65),
+            ("GES", "DEYE", "DEYE 40 KW STRING", 1719.03),
+            ("GES", "DEYE", "DEYE 50 KW STRING", 2286.90),
+            ("GES", "DEYE", "DEYE 60 KW STRING", 2529.45),
+            ("GES", "DEYE", "DEYE 80 KW STRING", 2910.60),
+            ("GES", "DEYE", "DEYE 100 KW STRING", 3326.40),
+            ("GES", "DEYE", "DEYE WİFİ STICK", 58.94),
+            ("GES", "DEYE", "DEYE LAN STICK", 68.76),
+            ("GES", "DEYE", "MONO PHASE SMART METER", 44.20),
+            ("GES", "DEYE", "THREE PHASE SMART METER", 108.05),
+
+            # HİBRİT İNVERTER GRUBU
+            ("GES", "DEYE", "DEYE 5KW MONOFAZE LV HİBRİT", 1031.42),
+            ("GES", "DEYE", "DEYE 6KW MONOFAZE LV HİBRİT", 1154.20),
+            ("GES", "DEYE", "DEYE 10KW MONOFAZE LV HİBRİT", 1964.60),
+            ("GES", "DEYE", "DEYE 16KW MONOFAZE LV HİBRİT", 2701.33),
+            ("GES", "DEYE", "DEYE 8KW TRİFAZE LV HİBRİT", 2161.06),
+            ("GES", "DEYE", "DEYE 10KW TRİFAZE LV HİBRİT", 2259.29),
+            ("GES", "DEYE", "DEYE 12KW TRİFAZE LV HİBRİT", 2357.52),
+            ("GES", "DEYE", "DEYE 15KW TRİFAZE LV HİBRİT", 2553.98),
+            ("GES", "DEYE", "DEYE 20KW TRİFAZE LV HİBRİT", 3438.05),
+            ("GES", "DEYE", "DEYE 10KW TRİFAZE HV HİBRİT", 1719.03),
+            ("GES", "DEYE", "DEYE 12KW TRİFAZE HV HİBRİT", 2062.83),
+            ("GES", "DEYE", "DEYE 15KW TRİFAZE HV HİBRİT", 2210.18),
+            ("GES", "DEYE", "DEYE 20KW TRİFAZE HV HİBRİT", 2357.52),
+            ("GES", "DEYE", "DEYE 25KW TRİFAZE HV HİBRİT", 2750.44),
+            ("GES", "DEYE", "DEYE 30KW TRİFAZE HV HİBRİT", 3830.97),
+            ("GES", "DEYE", "DEYE 40KW TRİFAZE HV HİBRİT", 5402.65),
+            ("GES", "DEYE", "DEYE 50KW TRİFAZE HV HİBRİT", 5893.80),
+            ("GES", "DEYE", "DEYE 80KW TRİFAZE HV HİBRİT", 8103.98)
+        ]
+        conn.executemany("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?, ?, ?, ?)", ges_urunleri)
+        conn.commit()
+    conn.close()
+
+# Otomatik olarak katalog verilerini veritabanına işleyelim
+katalog_urunlerini_ekle()
+
 # --- PDF OLUŞTURMA ---
 def pdf_olustur(paket, toplam, birim, kur=None):
     buffer = io.BytesIO()
@@ -39,7 +170,7 @@ def pdf_olustur(paket, toplam, birim, kur=None):
     return buffer
 
 # --- OTURUM ---
-if "usd_kuru" not in st.session_state: st.session_state.usd_kuru = 34.50
+if "usd_kuru" not in st.session_state: st.session_state.usd_kuru = 46.35
 if "paket_GES" not in st.session_state: st.session_state.paket_GES = []
 if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = []
 
@@ -49,13 +180,11 @@ with st.sidebar:
     
     # GÜÇLENDİRİLMİŞ CANLI KUR ÇEKME SİSTEMİ
     try:
-        # Alternatif ve kararlı bir döviz kuru API servisi kullanıldı
         res = requests.get("https://open.er-api.com/v6/latest/USD", timeout=3)
         data_json = res.json()
         if "rates" in data_json and "TRY" in data_json["rates"]:
             st.session_state.usd_kuru = float(data_json["rates"]["TRY"])
     except:
-        # Eğer internet/API erişimi olmazsa son geçerli kuru korur veya sabit bırakır
         pass
 
     st.metric("📊 CANLI USD/TL", f"{st.session_state.usd_kuru:.4f}")
