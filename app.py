@@ -16,12 +16,13 @@ def get_db_connection():
     conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar_v2 (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT, durum INTEGER DEFAULT 0)")
     return conn
 
-# --- BAŞLANGIÇ VERİLERİNİ YÜKLEME (GES KATALOĞU) ---
+# --- BAŞLANGIÇ VERİLERİNİ YÜKLEME (GES VE ELEKTRİK KATALOĞU) ---
 def katalog_urunlerini_ekle():
     conn = get_db_connection()
-    # Tabloda daha önce GES ürünü var mı kontrol et, yoksa katalog verilerini bas
-    sayi = conn.execute("SELECT COUNT(*) FROM urunler WHERE modul='GES'").fetchone()[0]
-    if sayi == 0:
+    
+    # GES Ürünleri Kontrolü ve Yüklemesi
+    sayi_ges = conn.execute("SELECT COUNT(*) FROM urunler WHERE modul='GES'").fetchone()[0]
+    if sayi_ges == 0:
         ges_urunleri = [
             # AKILLI INVERTER GRUBU
             ("GES", "SOLINVED", "1.2 KW MPPT AKILLI İNVERTER", 132.61),
@@ -142,6 +143,37 @@ def katalog_urunlerini_ekle():
         ]
         conn.executemany("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?, ?, ?, ?)", ges_urunleri)
         conn.commit()
+
+    # Elektrik (Zeybekmarket) Ürünleri Kontrolü ve Yüklemesi
+    sayi_elektrk = conn.execute("SELECT COUNT(*) FROM urunler WHERE modul='ELEKTRIK'").fetchone()[0]
+    if sayi_elektrk == 0:
+        zeybek_urunleri = [
+            ("ELEKTRIK", "Cata", "Ct-5223 Pars Kare Spot Siyah Kasa", 57.82),
+            ("ELEKTRIK", "Cata", "Ct-4221 3W Led Kapsül Ampul G9 220V / Günışığı", 36.70),
+            ("ELEKTRIK", "Cata", "Ct-4222 4W Led Kapsül Ampul G9 220V / Günışığı", 52.79),
+            ("ELEKTRIK", "Ledrox", "Hologram Fan 100 Cm 3D Video", 45600.00),
+            ("ELEKTRIK", "Ledrox", "Hologram Fan 65 Cm 3D Video", 25200.00),
+            ("ELEKTRIK", "Ledrox", "Hologram Fan 42 Cm 3D Video", 4500.00),
+            ("ELEKTRIK", "Cata", "Ct-5224 Pars Yuvarlak Siyah Kasa", 57.82),
+            ("ELEKTRIK", "Cata", "Ct-5258 6W Zebra Led Armatür (Siyah-Krom Kasa) 3 Renk", 40.22),
+            ("ELEKTRIK", "Cata", "Ct-4041 Etna Güç Kaynağı 300W", 5028.00),
+            ("ELEKTRIK", "Cata", "Ct-8640 Zen Sarkıt Led Armatür", 4022.40),
+            ("ELEKTRIK", "Cata", "Ct-7313 Nepal Solar Set Üstü 50W", 754.20),
+            ("ELEKTRIK", "Cata", "Ct-5333 30W Babil Ray Tipi Led Armatür Beyaz Kasa / Günışığı", 138.27),
+            ("ELEKTRIK", "Cata", "Ct-4650 300W Amazon Solar Led Projektör", 2262.60),
+            ("ELEKTRIK", "Cata", "Ct-5110 Tezgah Altı Priz Siyah Kasa / Günışığı", 263.97),
+            ("ELEKTRIK", "Cata", "Ct-4694 6W Gold Wallwasher 20 Cm / Amber", 628.50),
+            ("ELEKTRIK", "Cata", "Ct-3012 Kristal Led Tavan Armatür", 2891.10),
+            ("ELEKTRIK", "Fujiled", "12V COB Şerit Led 4000K 288 Ledli", 94.60),
+            ("ELEKTRIK", "Fujiled", "12V COB Şerit Led Günışığı 288 Ledli", 94.60),
+            ("ELEKTRIK", "Viko", "Karre Anahtar Beyaz - Çerçevesiz", 78.34),
+            ("ELEKTRIK", "Viko", "Karre Çocuk Korumalı Topraklı Priz Beyaz - Çerçevesiz", 128.11),
+            ("ELEKTRIK", "Viko", "Karre Kapaklı Topraklı Çocuk Korumalı Priz - Çerçevesiz", 138.72),
+            ("ELEKTRIK", "Viko", "Karre Dimmer 600W Beyaz - Çerçevesiz", 514.90)
+        ]
+        conn.executemany("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?, ?, ?, ?)", zeybek_urunleri)
+        conn.commit()
+
     conn.close()
 
 # Otomatik olarak katalog verilerini veritabanına işleyelim
