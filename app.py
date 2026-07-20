@@ -46,10 +46,18 @@ if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = [
 # --- YAN MENÜ ---
 with st.sidebar:
     st.title("PROTIME MÜHENDİSLİK")
+    
+    # GÜÇLENDİRİLMİŞ CANLI KUR ÇEKME SİSTEMİ
     try:
-        res = requests.get("https://api.frankfurter.app/latest?from=USD&to=TRY", timeout=2)
-        st.session_state.usd_kuru = float(res.json()["rates"]["TRY"])
-    except: st.session_state.usd_kuru = 34.50
+        # Alternatif ve kararlı bir döviz kuru API servisi kullanıldı
+        res = requests.get("https://open.er-api.com/v6/latest/USD", timeout=3)
+        data_json = res.json()
+        if "rates" in data_json and "TRY" in data_json["rates"]:
+            st.session_state.usd_kuru = float(data_json["rates"]["TRY"])
+    except:
+        # Eğer internet/API erişimi olmazsa son geçerli kuru korur veya sabit bırakır
+        pass
+
     st.metric("📊 CANLI USD/TL", f"{st.session_state.usd_kuru:.4f}")
     
     secim = st.radio("DEPARTMAN", ["☀️ GES (USD)", "⚡ ELEKTRİK (TL)"])
