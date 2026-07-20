@@ -24,7 +24,6 @@ def katalog_urunlerini_ekle():
     sayi_ges = conn.execute("SELECT COUNT(*) FROM urunler WHERE modul='GES'").fetchone()[0]
     if sayi_ges == 0:
         ges_urunleri = [
-            # AKILLI INVERTER GRUBU
             ("GES", "SOLINVED", "1.2 KW MPPT AKILLI İNVERTER", 132.61),
             ("GES", "SOLINVED", "3.6KW 24V MPPT AKILLI İNVERTER", 206.28),
             ("GES", "SOLINVED", "5 KW 24V MPPT AKILLI İNVERTER", 284.87),
@@ -36,8 +35,6 @@ def katalog_urunlerini_ekle():
             ("GES", "NEXDOUN", "4 KW 24V MPPT AKILLI İNVERTER", 249.48),
             ("GES", "NEXDOUN", "6 KW 48V MPPT AKILLI İNVERTER", 374.22),
             ("GES", "MERSON", "12 KW 48V MPPT AKILLI İNVERTER", 727.65),
-            
-            # AKÜ GRUBU
             ("GES", "VIGOR", "12V 100AH JEL AKÜ", 129.41),
             ("GES", "SOLINVED", "12V 100Ah JEL AKÜ", 126.97),
             ("GES", "SOLINVED", "12V 150Ah JEL AKÜ", 190.45),
@@ -52,13 +49,9 @@ def katalog_urunlerini_ekle():
             ("GES", "SOLINVED", "XH CONTROL BOX", 884.07),
             ("GES", "MEXSUN", "12.8V 200AH LITYUM AKU", 554.40),
             ("GES", "MEXSUN", "12.8V 300AH LİTYUM AKÜ", 658.35),
-
-            # KAMERA & ARAÇ ŞARJ
             ("GES", "SOLINVED", "CM04 4G KAMERA", 62.70),
             ("GES", "SOLINVED", "CM22 WİFİ KAMERA", 70.54),
             ("GES", "SOLINVED", "22 kW RADIUS MODEL AC CHARGER", 401.28),
-
-            # SÜRÜCÜ GRUBU
             ("GES", "SOLINVED", "3 HP 1.5kW 150-440v 1x220", 142.43),
             ("GES", "SOLINVED", "3 HP 2.2KW 150-440V 1X220", 225.93),
             ("GES", "SOLINVED", "5.5HP 4KW 150-440V 1X220", 250.49),
@@ -84,8 +77,6 @@ def katalog_urunlerini_ekle():
             ("GES", "SOLINVED", "200 HP 160kW 250-900V", 3830.97),
             ("GES", "SOLINVED", "225 HP 185kW 250-900V", 4469.47),
             ("GES", "SOLINVED", "250 HP 200kW 250-900V", 4665.93),
-
-            # DC POMPA GRUBU
             ("GES", "SOLINVED", "48V 750W 3.8TON 95M (2X550W)", 176.81),
             ("GES", "SOLINVED", "48V 400W 3.8TON 47M", 166.99),
             ("GES", "SOLINVED", "48V 500W 1.7TON 109M", 176.81),
@@ -101,8 +92,6 @@ def katalog_urunlerini_ekle():
             ("GES", "SOLINVED", "1HP 750W 72V MAX 20M UZAKLIK", 128.21),
             ("GES", "SOLINVED", "1.5HP 1100W 96V MAX 17M UZAKLIK", 135.14),
             ("GES", "SOLINVED", "2HP 1500W 110V MAX 13M UZAKLIK", 155.93),
-
-            # ON GRID İNVERTER GRUBU
             ("GES", "DEYE", "DEYE 5 KW STRING", 515.71),
             ("GES", "DEYE", "DEYE 8 KW STRING", 525.53),
             ("GES", "DEYE", "DEYE 10 KW STRING", 540.27),
@@ -120,8 +109,6 @@ def katalog_urunlerini_ekle():
             ("GES", "DEYE", "DEYE LAN STICK", 68.76),
             ("GES", "DEYE", "MONO PHASE SMART METER", 44.20),
             ("GES", "DEYE", "THREE PHASE SMART METER", 108.05),
-
-            # HİBRİT İNVERTER GRUBU
             ("GES", "DEYE", "DEYE 5KW MONOFAZE LV HİBRİT", 1031.42),
             ("GES", "DEYE", "DEYE 6KW MONOFAZE LV HİBRİT", 1154.20),
             ("GES", "DEYE", "DEYE 10KW MONOFAZE LV HİBRİT", 1964.60),
@@ -148,7 +135,6 @@ def katalog_urunlerini_ekle():
     sayi_elektrk = conn.execute("SELECT COUNT(*) FROM urunler WHERE modul='ELEKTRIK'").fetchone()[0]
     if sayi_elektrk == 0:
         zeybek_urunleri = [
-            # Aydınlatma, Priz vb. Ürünler
             ("ELEKTRIK", "Cata", "Ct-5223 Pars Kare Spot Siyah Kasa", 57.82),
             ("ELEKTRIK", "Cata", "Ct-4221 3W Led Kapsül Ampul G9 220V / Günışığı", 36.70),
             ("ELEKTRIK", "Cata", "Ct-4222 4W Led Kapsül Ampul G9 220V / Günışığı", 52.79),
@@ -171,8 +157,6 @@ def katalog_urunlerini_ekle():
             ("ELEKTRIK", "Viko", "Karre Çocuk Korumalı Topraklı Priz Beyaz - Çerçevesiz", 128.11),
             ("ELEKTRIK", "Viko", "Karre Kapaklı Topraklı Çocuk Korumalı Priz - Çerçevesiz", 138.72),
             ("ELEKTRIK", "Viko", "Karre Dimmer 600W Beyaz - Çerçevesiz", 514.90),
-            
-            # Enerji Kabloları Kategorisi Ürünleri
             ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 2x1.5 mm", 1250.00),
             ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 2x2.5 mm", 1950.00),
             ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x1.5 mm", 1750.00),
@@ -191,8 +175,6 @@ def katalog_urunlerini_ekle():
             ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x4 mm² Solar Kablo (Siyah)", 14.50),
             ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x6 mm² Solar Kablo (Kırmızı)", 21.00),
             ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x6 mm² Solar Kablo (Siyah)", 21.00),
-
-            # Kablo Bağlantı Ekipmanları ve Aksesuarları Kategorisi Ürünleri
             ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 2.5 x 100 mm (100'lü Paket)", 45.00),
             ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 3.6 x 200 mm (100'lü Paket)", 95.00),
             ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 4.8 x 300 mm (100'lü Paket)", 185.00),
@@ -207,8 +189,6 @@ def katalog_urunlerini_ekle():
             ("ELEKTRIK", "Caspian", "Plastik Spiral Boru 16 mm (50 Metre Top)", 450.00),
             ("ELEKTRIK", "Caspian", "Plastik Spiral Boru 20 mm (50 Metre Top)", 580.00),
             ("ELEKTRIK", "Caspian", "Duvaklı / Vidalı Dubel 8 mm (100'lü Paket)", 75.00),
-
-            # Plastik Panolar ve Kutular Kategorisi Ürünleri
             ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 2'li", 85.00),
             ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 4'lü", 120.00),
             ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 6'lı", 165.00),
