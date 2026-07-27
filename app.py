@@ -15,14 +15,12 @@ st.set_page_config(
 # ---------------------------------------------------------
 def canli_kur_cek():
   try:
-    # Ücretsiz ve açık döviz API servisi
     url = "https://api.exchangerate-api.com/v4/latest/USD"
     response = requests.get(url, timeout=3)
     data = response.json()
     tl_kur = data["rates"]["TRY"]
     return round(tl_kur, 2)
   except:
-    # API erişilemezse varsayılan kuru döndürür
     return 33.50
 
 
@@ -33,7 +31,6 @@ if "sepet" not in st.session_state:
   st.session_state.sepet = []
 
 if "dolar_kur" not in st.session_state:
-  # İlk açılışta canlı kuru otomatik olarak sisteme çeker
   st.session_state.dolar_kur = canli_kur_cek()
 
 # ---------------------------------------------------------
@@ -68,22 +65,17 @@ st.markdown(
         border: 1px solid rgba(255, 255, 255, 0.18);
     }
     
-    .product-card {
+    .product-box {
         background: rgba(255, 255, 255, 0.1);
         padding: 1rem;
         border-radius: 10px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        text-align: center;
         margin-bottom: 1.5rem;
         border-top: 4px solid #f39c12;
         backdrop-filter: blur(8px);
         border-left: 1px solid rgba(255, 255, 255, 0.1);
         border-right: 1px solid rgba(255, 255, 255, 0.1);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        transition: transform 0.3s ease;
-    }
-    .product-card:hover {
-        transform: translateY(-5px);
     }
     
     /* Sidebar Tasarımı */
@@ -179,7 +171,6 @@ sayfa = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.subheader("💱 Canlı Dolar Kuru (Otomatik)")
 
-# Otomatik kur güncelleme butonu
 if st.sidebar.button("🔄 Kuru Canlı Güncelle"):
   st.session_state.dolar_kur = canli_kur_cek()
   st.sidebar.success("Kur başarıyla güncellendi!")
@@ -247,31 +238,31 @@ if sayfa == "GES Katalog & Ürünler":
     gorunen_urun_sayisi += 1
 
     with hedef_kolon:
-      # Ürün Kartı ve Görsel Entegrasyonu
-      st.markdown(
-          f"""
-                <div class="product-card">
-                    <img src="{urun['gorsel']}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 10px;">
-                    <span style="background: rgba(44, 83, 100, 0.9); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #fff; font-weight: bold;">{urun["kategori"]}</span>
-                    <h3 style="color: #ffffff; font-size: 1.05rem; margin-top: 8px; min-height: 45px;">{urun["ad"]}</h3>
-                    <p style="color: #dddddd; font-size: 0.8rem; min-height: 35px;">{urun["aciklama"]}</p>
-                    <h4 style="color: #f39c12; margin: 3px 0;">${urun["fiyat_usd"]:,} <span style="font-size: 0.75rem; color: #bbb;">(USD)</span></h4>
-                    <p style="color: #2ecc71; font-size: 0.95rem; font-weight: bold;">₺{fiyat_tl:,.2f} <span style="font-size: 0.7rem; color: #bbb;">(KDV Hariç)</span></p>
-                </div>
+      with st.container():
+        st.markdown(f'<div class="product-box">', unsafe_allow_html=True)
+        # Streamlit yerel resim gösterici ile görseller artık sorunsuz yüklenecek
+        st.image(urun["gorsel"], use_container_width=True)
+        st.markdown(
+            f"""
+                <span style="background: rgba(44, 83, 100, 0.9); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #fff; font-weight: bold;">{urun["kategori"]}</span>
+                <h3 style="color: #ffffff; font-size: 1.05rem; margin-top: 8px; min-height: 45px;">{urun["ad"]}</h3>
+                <p style="color: #dddddd; font-size: 0.8rem; min-height: 35px;">{urun["aciklama"]}</p>
+                <h4 style="color: #f39c12; margin: 3px 0;">${urun["fiyat_usd"]:,} <span style="font-size: 0.75rem; color: #bbb;">(USD)</span></h4>
+                <p style="color: #2ecc71; font-size: 0.95rem; font-weight: bold;">₺{fiyat_tl:,.2f} <span style="font-size: 0.7rem; color: #bbb;">(KDV Hariç)</span></p>
             """,
-          unsafe_allow_html=True,
-      )
-
-      if st.button(f"➕ Sepete Ekle", key=f"ekle_{urun['id']}"):
-        st.session_state.sepet.append(
-            {
-                "id": urun["id"],
-                "ad": urun["ad"],
-                "fiyat_usd": urun["fiyat_usd"],
-                "fiyat_tl": fiyat_tl,
-            }
+            unsafe_allow_html=True,
         )
-        st.success(f"'{urun['ad']}' sepete eklendi!")
+        if st.button(f"➕ Sepete Ekle", key=f"ekle_{urun['id']}"):
+          st.session_state.sepet.append(
+              {
+                  "id": urun["id"],
+                  "ad": urun["ad"],
+                  "fiyat_usd": urun["fiyat_usd"],
+                  "fiyat_tl": fiyat_tl,
+              }
+          )
+          st.success(f"'{urun['ad']}' sepete eklendi!")
+        st.markdown(f"</div>", unsafe_allow_html=True)
 
   if gorunen_urun_sayisi == 0:
     st.info("Aradığınız kriterlere uygun ürün bulunamadı.")
