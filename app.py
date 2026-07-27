@@ -162,6 +162,11 @@ if "urunler_db" not in st.session_state:
 st.markdown(
     """
     <style>
+    /* Üst kısımdaki beyaz şeritleri ve varsayılan header alanlarını şeffaflaştır */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
+    
     /* Solinved Benzeri Geniş Açı Solar Panel Kurumsal Arka Plan */
     .stApp {
         background-image: linear-gradient(rgba(11, 19, 43, 0.88), rgba(18, 30, 60, 0.88)), 
