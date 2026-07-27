@@ -2,7 +2,7 @@ import datetime
 import requests
 import streamlit as st
 
-# Sayfa Yapılandırması (Mobil ve Masaüstü Uyumlu)
+# Sayfa Yapılandırması (Mobil ve Masaüstü Uyumlu Müşteri Ekranı)
 st.set_page_config(
     page_title="PROTIME ERP & Solinved - Akıllı Enerji Sistemleri",
     page_icon="☀️",
@@ -89,7 +89,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# ÜRÜN KATALOĞU (Solinved ve Gerçek GES Bileşen Görselleri)
+# MÜŞTERİ KATALOĞU (Ürünler ve Görseller)
 # ---------------------------------------------------------
 urunler_db = [
     {
@@ -97,7 +97,7 @@ urunler_db = [
         "ad": "Solinved Akıllı Hibrit İnverter 10kW",
         "kategori": "İnverterler",
         "fiyat_usd": 1450,
-        "aciklama": "Yüksek verimli tam sinüs hibrit invertör çözümleri.",
+        "aciklama": "Yüksek verimli tam sinüs hibrit inverter çözümleri.",
         "gorsel": (
             "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=600&auto=format&fit=crop"
         ),
@@ -155,34 +155,27 @@ urunler_db = [
 ]
 
 # ---------------------------------------------------------
-# ÜST MENÜ & YÖNETİM PANELİ (Sidebar)
+# MÜŞTERİ MENÜSÜ (Sidebar)
 # ---------------------------------------------------------
-st.sidebar.title("⚙️ PROTIME ERP & Sistem")
+st.sidebar.title("☀️ Müşteri Portal")
 sayfa = st.sidebar.radio(
-    "Navigasyon",
+    "Menü",
     [
         "GES Katalog & Ürünler",
-        "Teklif & Sepet",
-        "Yönetim / Kur & Fiyat Ayarları",
-        "İletişim & Proje Talebi",
+        "Teklif Sepetim",
+        "Döviz Kuru Bilgisi",
+        "İletişim & Talep Formu",
     ],
 )
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("💱 Canlı Dolar Kuru (Otomatik)")
+st.sidebar.subheader("💱 Güncel Kur Bilgisi")
 
-if st.sidebar.button("🔄 Kuru Canlı Güncelle"):
+if st.sidebar.button("🔄 Kuru Yenile"):
   st.session_state.dolar_kur = canli_kur_cek()
-  st.sidebar.success("Kur başarıyla güncellendi!")
+  st.sidebar.success("Kur güncellendi!")
 
-guncel_kur = st.sidebar.number_input(
-    "Dolar Kuru (TL)",
-    min_value=1.0,
-    value=st.session_state.dolar_kur,
-    step=0.01,
-    format="%.2f",
-)
-st.session_state.dolar_kur = guncel_kur
+st.sidebar.info(f"1 USD = ₺{st.session_state.dolar_kur}")
 st.sidebar.caption(
     f"Son Kontrol: {datetime.datetime.now().strftime('%d.%m.%Y %H:%M')}"
 )
@@ -194,8 +187,8 @@ if sayfa == "GES Katalog & Ürünler":
   st.markdown(
       """
         <div class="hero-container">
-            <h1 style="font-size: 2.5rem; margin-bottom: 10px; color: #ffffff !important;">PROTIME ERP - Güneş Enerjisi Sistemleri</h1>
-            <p style="font-size: 1.1rem; color: #e0e0e0 !important;">Yüksek verimli invertörler, lityum aküler ve profesyonel GES bileşenleri yönetim paneli.</p>
+            <h1 style="font-size: 2.3rem; margin-bottom: 10px; color: #ffffff !important;">Solinved & PROTIME ERP Müşteri Kataloğu</h1>
+            <p style="font-size: 1.1rem; color: #e0e0e0 !important;">Projeleriniz için yüksek verimli güneş enerjisi sistemleri ve anlık kur entegreli fiyatlar.</p>
         </div>
     """,
       unsafe_allow_html=True,
@@ -204,7 +197,7 @@ if sayfa == "GES Katalog & Ürünler":
   col_f1, col_f2 = st.columns([2, 2])
   with col_f1:
     kategori_secim = st.selectbox(
-        "Kategori Filtrele",
+        "Kategori Seçin",
         [
             "Tümü",
             "İnverterler",
@@ -215,9 +208,9 @@ if sayfa == "GES Katalog & Ürünler":
         ],
     )
   with col_f2:
-    arama_metni = st.text_input("🔍 Ürün Ara", placeholder="Ürün adı yazın...")
+    arama_metni = st.text_input("🔍 Ürün Ara", placeholder="Arama yapın...")
 
-  st.markdown("### 📦 Ürün Listesi ve Katalog")
+  st.markdown("### 📦 Ürün Listesi")
 
   col1, col2, col3 = st.columns(3)
   kolonlar = [col1, col2, col3]
@@ -256,7 +249,7 @@ if sayfa == "GES Katalog & Ürünler":
               {
                   "id": urun["id"],
                   "ad": urun["ad"],
-                  "fiyat_usd": urun["fiyat_usd"],
+                  "fiyat_usd":urun["fiyat_usd"],
                   "fiyat_tl": fiyat_tl,
               }
           )
@@ -267,13 +260,15 @@ if sayfa == "GES Katalog & Ürünler":
     st.info("Aradığınız kriterlere uygun ürün bulunamadı.")
 
 # ---------------------------------------------------------
-# SAYFA 2: TEKLİF & SEPET YÖNETİMİ
+# SAYFA 2: TEKLİF SEPETİM
 # ---------------------------------------------------------
-elif sayfa == "Teklif & Sepet":
-  st.subheader("🛒 Oluşturulan Teklif ve Sepet Detayları")
+elif sayfa == "Teklif Sepetim":
+  st.subheader("🛒 Teklif Sepetiniz")
 
   if not st.session_state.sepet:
-    st.info("Sepetinizde henüz ürün bulunmuyor. Katalogdan ürün ekleyebilirsiniz.")
+    st.info(
+        "Sepetinizde henüz ürün bulunmuyor. Katalogdan ürün ekleyebilirsiniz."
+    )
   else:
     toplam_usd = 0
     toplam_tl = 0
@@ -301,67 +296,53 @@ elif sayfa == "Teklif & Sepet":
       st.metric(label="Toplam Tutar (TL)", value=f"₺{toplam_tl:,.2f}")
 
     st.markdown("### 📄 Proforma / Teklif Oluştur")
-    musteri_adi = st.text_input("Müşteri / Firma Adı")
+    musteri_adi = st.text_input("Adınız Soyadınız / Firma Adı")
     yetkili_kisi = st.text_input("Yetkili Kişi", value="EFE CEYLAN")
 
-    if st.button("Teklif Belgesi Hazırla"):
+    if st.button("Teklif Talebi Oluştur"):
       if musteri_adi:
         st.success(
-            f"Sayın {yetkili_kisi} ({musteri_adi}) için teklif başarıyla"
-            " oluşturuldu!"
+            f"Sayın {yetkili_kisi} ({musteri_adi}), teklif talebiniz başarıyla"
+            " alınmıştır!"
         )
         st.info(
             f"Genel Toplam: ₺{toplam_tl:,.2f} ($ {toplam_usd:,.2f} - Kur:"
             f" {st.session_state.dolar_kur})"
         )
       else:
-        st.warning("Lütfen müşteri veya firma adını giriniz.")
+        st.warning("Lütfen adınızı veya firma adını giriniz.")
 
     if st.button("Sepeti Temizle"):
       st.session_state.sepet = []
       st.rerun()
 
 # ---------------------------------------------------------
-# SAYFA 3: YÖNETİM / KUR VE FİYAT AYARLARI
+# SAYFA 3: DÖVİZ KURU BİLGİSİ
 # ---------------------------------------------------------
-elif sayfa == "Yönetim / Kur & Fiyat Ayarları":
-  st.subheader("⚙️ PROTIME ERP - Sistem ve Fiyat Yönetimi")
+elif sayfa == "Döviz Kuru Bilgisi":
+  st.subheader("💱 Anlık Kur Entegrasyonu ve Fiyatlandırma Politikası")
   st.write(
-      "Bu ekrandan döviz kuruna bağlı olarak tüm GES bileşenlerinin güncel"
-      " maliyet yansımalarını kontrol edebilirsiniz."
+      "Sistemimiz, piyasa koşullarına bağlı olarak döviz kurunu otomatik"
+      " olarak takip eder ve tüm GES bileşenlerinin TL karşılıklarını anlık"
+      " günceller."
   )
 
-  st.markdown("### 📊 Mevcut Kur Durumu")
-  st.info(
-      "Sistemde aktif tanımlı Dolar Kuru: **"
-      f"{st.session_state.dolar_kur} TL**"
-  )
+  st.markdown("### 📊 Aktif Kur Değeri")
+  st.info(f"Geçerli Dolar Kuru: **{st.session_state.dolar_kur} TL**")
 
-  yeni_kur_girdisi = st.number_input(
-      "Yeni Dolar Kurunu Güncelle",
-      value=st.session_state.dolar_kur,
-      step=0.05,
-  )
-  if st.button("Kuru Uygula ve Fiyatları Güncelle"):
-    st.session_state.dolar_kur = yeni_kur_girdisi
-    st.success(
-        f"Dolar kuru başarıyla {yeni_kur_girdisi} TL olarak güncellendi! Tüm"
-        " katalog fiyatları yeniden hesaplandı."
-    )
-
-  st.markdown("### 📋 Sistem Katalog Veritabanı (Özet)")
+  st.markdown("### 📋 Katalog Ürünlerinin Güncel TL Karşılıkları")
   for u in urunler_db:
     hesaplanan_tl = u["fiyat_usd"] * st.session_state.dolar_kur
     st.write(
-        f"- **{u['ad']}** | Liste Fiyatı: ${u['fiyat_usd']} | Satış Fiyatı:"
-        f" ₺{hesaplanan_tl:,.2f}"
+        f"- **{u['ad']}** | Liste Fiyatı: ${u['fiyat_usd']} | Güncel Satış"
+        f" Fiyatı: ₺{hesaplanan_tl:,.2f}"
     )
 
 # ---------------------------------------------------------
-# SAYFA 4: İLETİŞİM & PROJE TALEBİ
+# SAYFA 4: İLETİŞİM & TALEP FORMU
 # ---------------------------------------------------------
-elif sayfa == "İletişim & Proje Talebi":
-  st.subheader("📍 İletişim ve GES Proje Başvurusu")
+elif sayfa == "İletişim & Talep Formu":
+  st.subheader("📍 İletişim ve Proje Başvurusu")
 
   col_i1, col_i2 = st.columns(2)
 
