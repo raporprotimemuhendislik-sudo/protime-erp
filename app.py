@@ -46,7 +46,7 @@ if "urunler_db" not in st.session_state:
           "stok": 15,
           "aciklama": "Yüksek verimli tam sinüs hibrit inverter çözümleri.",
           "gorsel": (
-              "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop"
           ),
       },
       {
@@ -59,7 +59,7 @@ if "urunler_db" not in st.session_state:
               "Uzun ömürlü, güvenli ve modüler enerji depolama sistemleri."
           ),
           "gorsel": (
-              "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=600&auto=format&fit=crop"
           ),
       },
       {
@@ -127,7 +127,6 @@ st.markdown(
         color: #ffffff !important;
     }
     
-    /* Tüm Butonların Net Görünmesi İçin Turuncu Tasarım */
     .stButton>button {
         background-color: #f39c12 !important;
         color: #ffffff !important;
@@ -425,7 +424,7 @@ elif sayfa == "Yönetim Paneli":
     st.markdown("---")
     st.markdown("### 🛠️ Ürün ve Stok Kontrol Paneli")
 
-    with st.expander("➕ Yeni Ürün Ekle / Stok Güncelle"):
+    with st.expander("➕ Yeni Ürün Ekle / Görsel Tanımla"):
       yeni_ad = st.text_input("Ürün Adı")
       yeni_kategori = st.selectbox(
           "Kategori",
@@ -443,9 +442,9 @@ elif sayfa == "Yönetim Paneli":
       )
       yeni_aciklama = st.text_area("Ürün Açıklaması")
       yeni_gorsel = st.text_input(
-          "Görsel URL",
+          "Görsel URL (Ürün Resim Bağlantısı)",
           value=(
-              "https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=600&auto=format&fit=crop"
           ),
       )
 
@@ -469,11 +468,13 @@ elif sayfa == "Yönetim Paneli":
         else:
           st.warning("Lütfen ürün adını giriniz.")
 
-    st.markdown("### 📋 Mevcut Ürünler ve Stok Listesi")
+    st.markdown("### 📋 Mevcut Ürünler, Görseller ve Stok Listesi")
     for idx, urun in enumerate(st.session_state.urunler_db):
       col_m1, col_m2, col_m3, col_m4 = st.columns([3, 2, 2, 1])
       with col_m1:
         st.write(f"**{urun['ad']}** ({urun['kategori']})")
+        # Yönetim panelinde ürünün mevcut görselini önizleme olarak gösterir
+        st.image(urun["gorsel"], width=100)
       with col_m2:
         yeni_f = st.number_input(
             f"Fiyat ($) ID:{urun['id']}",
