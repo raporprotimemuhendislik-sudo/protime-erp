@@ -42,10 +42,7 @@ if "gelen_talepler" not in st.session_state:
 if "aktif_detay_urun" not in st.session_state:
   st.session_state.aktif_detay_urun = None
 
-if "ana_sayfa_kategori" not in st.session_state:
-  st.session_state.ana_sayfa_kategori = "Tümü"
-
-# Ürün ve Ekipman Kataloğu
+# Ürün ve Ekipman Kataloğu (Teknik Veriler Dahil)
 if "urunler_db" not in st.session_state:
   st.session_state.urunler_db = [
       {
@@ -57,6 +54,10 @@ if "urunler_db" not in st.session_state:
           "aciklama": (
               "Yüksek verimli tam sinüs hibrit inverter çözümleri. Şebeke"
               " bağlantılı ve akü destekli çalışabilme özelliği."
+          ),
+          "teknik": (
+              "• Nominal Güç: 10 kW\n• Maks. PV Giriş Gücü: 15 kW\n• Faz Sayısı:"
+              " Trifaze (3 Faz)\n• Verimlilik: %98.2\n• Koruma Sınıfı: IP65"
           ),
           "gorsel": (
               "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=800&auto=format&fit=crop"
@@ -72,6 +73,10 @@ if "urunler_db" not in st.session_state:
               "Evsel ve küçük işletmeler için kompakt, yüksek verimli saf sinüs"
               " inverter."
           ),
+          "teknik": (
+              "• Nominal Güç: 5 kW\n• Maks. PV Giriş Gücü: 7.5 kW\n• Faz Sayısı:"
+              " Monofaze (1 Faz)\n• Verimlilik: %97.8\n• Koruma Sınıfı: IP65"
+          ),
           "gorsel": (
               "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop"
           ),
@@ -85,6 +90,10 @@ if "urunler_db" not in st.session_state:
           "aciklama": (
               "Fabrikalar ve büyük tarımsal sulama projeleri için endüstriyel"
               " güç."
+          ),
+          "teknik": (
+              "• Nominal Güç: 30 kW\n• Maks. PV Giriş Gücü: 45 kW\n• Faz Sayısı:"
+              " Trifaze (3 Faz)\n• Verimlilik: %98.6\n• Koruma Sınıfı: IP66"
           ),
           "gorsel": (
               "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop"
@@ -100,6 +109,11 @@ if "urunler_db" not in st.session_state:
               "Yüksek verimli PERC teknoloji güneş paneli. Düşük ışıkta"
               " maksimum güç üretimi."
           ),
+          "teknik": (
+              "• Güç: 550 Watt\n• Hücre Tipi: Monokristal PERC\n• Modül"
+              " Verimliliği: %21.5\n• Boyutlar: 2279 x 1134 x 35 mm\n• Ağırlık:"
+              " 28.6 kg"
+          ),
           "gorsel": (
               "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
           ),
@@ -113,6 +127,11 @@ if "urunler_db" not in st.session_state:
           "aciklama": (
               "Çift yüzlü ışık alabilme özelliği ile standart panellere göre"
               " %20 daha fazla verim."
+          ),
+          "teknik": (
+              "• Güç: 580 Watt\n• Hücre Tipi: Bifacial (Çift Yüzlü)\n• Modül"
+              " Verimliliği: %22.4\n• Boyutlar: 2278 x 1134 x 30 mm\n• Garanti: 25"
+              " Yıl Performans"
           ),
           "gorsel": (
               "https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=800&auto=format&fit=crop"
@@ -128,6 +147,11 @@ if "urunler_db" not in st.session_state:
               "Uzun ömürlü, güvenli ve modüler enerji depolama sistemleri."
               " Yüksek deşarj kapasitesi."
           ),
+          "teknik": (
+              "• Kapasite: 5.12 kWh\n• Voltaj: 51.2V\n• Hücre Kimyası: LiFePO4"
+              " (Lityum Demir Fosfat)\n• Döngü Ömrü: 6000+ Çevrim\n• Haberleşme:"
+              " CAN / RS485"
+          ),
           "gorsel": (
               "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=800&auto=format&fit=crop"
           ),
@@ -141,6 +165,10 @@ if "urunler_db" not in st.session_state:
           "aciklama": (
               "Yüksek kapasiteli depolama ünitesi, akıllı BMS koruma"
               " sistemli."
+          ),
+          "teknik": (
+              "• Kapasite: 10.24 kWh\n• Voltaj: 51.2V\n• Hücre Kimyası: LiFePO4"
+              " Modüler\n• Döngü Ömrü: 6500 Çevrim\n• Koruma: Dahili Akıllı BMS"
           ),
           "gorsel": (
               "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=800&auto=format&fit=crop"
@@ -156,6 +184,11 @@ if "urunler_db" not in st.session_state:
               "Inverter, akü ve paneller dahil komple villa/tarla paket"
               " sistemi. Anahtar teslim çözüm."
           ),
+          "teknik": (
+              "• Paket İçeriği: 5kW Inverter + 5kWh Akü + 9 Adet 550W Panel\n•"
+              " Kullanım Alanı: Bağ Evi, Villalar ve Tarımsal Sulama\n• Kurulum:"
+              " Anahtar Teslim"
+          ),
           "gorsel": (
               "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=800&auto=format&fit=crop"
           ),
@@ -170,6 +203,10 @@ if "urunler_db" not in st.session_state:
               "İşletmeler ve fabrikalar için anahtar teslim yüksek verimli"
               " paket sistem."
           ),
+          "teknik": (
+              "• Paket İçeriği: 10kW Hibrit Inverter + 10kWh Akü + 18 Adet 550W"
+              " Panel\n• Kullanım Alanı: Küçük İşletmeler, Ofisler ve Atölyeler"
+          ),
           "gorsel": (
               "https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=800&auto=format&fit=crop"
           ),
@@ -182,6 +219,10 @@ if "urunler_db" not in st.session_state:
           "stok": 50,
           "aciklama": (
               "TUV sertifikalı, güneşe dayanıklı fotovoltaik kablo seti."
+          ),
+          "teknik": (
+              "• Kesit: 6 mm² Kalaylı Bakır\n• Sertifika: TUV 2PfG 1169\n•"
+              " Renkler: Kırmızı / Siyah\n• Uzunluk: 100 Metre Top"
           ),
           "gorsel": (
               "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=800&auto=format&fit=crop"
@@ -196,6 +237,10 @@ if "urunler_db" not in st.session_state:
           "aciklama": (
               "Tarımsal sulama ve endüstriyel su pompaları için özel sürücü."
           ),
+          "teknik": (
+              "• Güç: 7.5 kW (10 HP)\n• Giriş Voltajı: 380V Trifaze\n• MPPT"
+              " Özelliği: %99 Verim\n• Koruma: Susuz Çalışma Koruması"
+          ),
           "gorsel": (
               "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop"
           ),
@@ -207,6 +252,10 @@ if "urunler_db" not in st.session_state:
           "fiyat_usd": 220,
           "stok": 30,
           "aciklama": "Sigortalı ve surge arrestörlü komple koruma panosu.",
+          "teknik": (
+              "• DC Sigorta: 1000V 32A\n• AC Sigorta: 40A 3P\n• Surge Arrestör:"
+              " Tip 2 DC / AC\n• Kutu: IP65 Polikarbonat"
+          ),
           "gorsel": (
               "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop"
           ),
@@ -214,7 +263,7 @@ if "urunler_db" not in st.session_state:
   ]
 
 # ---------------------------------------------------------
-# PROTIME MÜHENDİSLİK KURUMSAL CSS VE ÖZEL KUTU TASARIMI
+# PROTIME MÜHENDİSLİK KURUMSAL CSS VE KART TASARIMI
 # ---------------------------------------------------------
 st.markdown(
     """
@@ -265,7 +314,7 @@ st.markdown(
         border: 1px solid #2c5282;
     }
     
-    /* SAYDAM OLMAYAN, BELİRGİN ÇERÇEVELİ ÜRÜN KUTULARI */
+    /* SAYDAM OLMAYAN, ÇERÇEVELİ ÜRÜN KARTLARI */
     .product-box {
         background-color: #102a43 !important;
         padding: 1.2rem;
@@ -318,8 +367,9 @@ st.sidebar.caption(
 )
 
 
-# Ürünleri listeleme ve detay fonksiyonu
+# Ürünleri listeleme ve detay sayfası fonksiyonu
 def urunleri_grid_listele(filtre_kategori=None):
+  # --- ÜRÜN DETAY SAYFASI (Tıklayınca Açılan Sayfa) ---
   if st.session_state.aktif_detay_urun is not None:
     urun = st.session_state.aktif_detay_urun
     if st.button("⬅️ Katalog Geri Dön"):
@@ -343,14 +393,23 @@ def urunleri_grid_listele(filtre_kategori=None):
           f"**Kategori:** <span style='color: #f39c12;'>{urun['kategori']}</span>",
           unsafe_allow_html=True,
       )
-      st.markdown(f"**Açıklama:** {urun['aciklama']}")
-      st.markdown(f"**Stok Adedi:** {urun['stok']} Adet")
+      st.markdown(f"**Ürün Açıklaması:** {urun['aciklama']}")
+
+      st.markdown("### 📋 Teknik Veriler ve Özellikler")
+      st.markdown(
+          f"<div style='background: #102a43; padding: 15px; border-radius: 8px;"
+          f" border: 1px solid #243b53; white-space: pre-line;'>{urun.get('teknik',"Teknik veri bulunmuyor.")}</div>",
+          unsafe_allow_html=True,
+      )
+
+      st.markdown(f"**Stok Durumu:** {urun['stok']} Adet")
 
       fiyat_tl = urun["fiyat_usd"] * st.session_state.dolar_kur
       st.markdown(f"### Birim Fiyat: ${urun['fiyat_usd']:,} USD")
       st.markdown(
-          f"### Güncel Tutar: ₺{fiyat_tl:,.2f} <span"
-          " style='font-size:0.8rem; color:#94a3b8;'>(KDV Hariç)</span>",
+          f"### Güncel Tutar (TL Karşılığı): ₺{fiyat_tl:,.2f} <span"
+          " style='font-size:0.8rem; color:#94a3b8;'>(KDV Hariç, 1 USD ="
+          f" ₺{st.session_state.dolar_kur})</span>",
           unsafe_allow_html=True,
       )
 
@@ -369,6 +428,7 @@ def urunleri_grid_listele(filtre_kategori=None):
         st.error("Üzgünüz, bu ürünün stoğu tükenmiştir.")
     return
 
+  # Normal Katalog Grid Listeleme (Kart İçinde)
   col1, col2, col3 = st.columns(3)
   kolonlar = [col1, col2, col3]
 
@@ -402,7 +462,7 @@ def urunleri_grid_listele(filtre_kategori=None):
                 <p style="color: #cbd5e1; font-size: 0.85rem; min-height: 40px;">{urun["aciklama"]}</p>
                 <p style="color: #38bdf8; font-size: 0.85rem; margin: 0 0 5px 0;">Stok: <b>{urun["stok"]} Adet</b></p>
                 <h4 style="color: #f39c12; margin: 5px 0;">${urun["fiyat_usd"]:,} <span style="font-size: 0.75rem; color: #94a3b8;">(USD)</span></h4>
-                <p style="color: #4ade80; font-size: 1rem; font-weight: bold; margin-bottom: 10px;">₺{fiyat_tl:,.2f} <span style="font-size: 0.7rem; color: #94a3b8;">(KDV Hariç)</span></p>
+                <p style="color: #4ade80; font-size: 1rem; font-weight: bold; margin-bottom: 10px;">₺{fiyat_tl:,.2f} <span style="font-size: 0.7rem; color: #94a3b8;">(TL Karşılığı)</span></p>
             """,
             unsafe_allow_html=True,
         )
@@ -444,35 +504,8 @@ if sayfa == "GES Katalog & Tüm Ürünler":
       unsafe_allow_html=True,
   )
 
-  # Hızlı Kategori Seçimi Butonları
-  st.markdown("### ⚡ Hızlı Kategori Seçimi")
-  k_col1, k_col2, k_col3 = st.columns(3)
-  with k_col1:
-    if st.button("⚡ İnverterler Kategorisi"):
-      st.session_state.ana_sayfa_kategori = "İnverterler"
-      st.rerun()
-  with k_col2:
-    if st.button("☀️ Paneller Kategorisi"):
-      st.session_state.ana_sayfa_kategori = "Paneller"
-      st.rerun()
-  with k_col3:
-    if st.button("📦 Kurulu GES Sistemleri"):
-      st.session_state.ana_sayfa_kategori = "Kurulu GES Sistemleri"
-      st.rerun()
-
-  if st.session_state.ana_sayfa_kategori != "Tümü":
-    if st.button(
-        f"🔙 Tüm Kataloğa Geri Dön (Aktif Filtre:"
-        f" {st.session_state.ana_sayfa_kategori})"
-    ):
-      st.session_state.ana_sayfa_kategori = "Tümü"
-      st.rerun()
-
-  st.markdown("---")
-  st.markdown(
-      f"### 📦 Ürün ve Ekipman Kataloğu ({st.session_state.ana_sayfa_kategori})"
-  )
-  urunleri_grid_listele(st.session_state.ana_sayfa_kategori)
+  st.markdown("### 📦 Ürün ve Ekipman Kataloğu")
+  urunleri_grid_listele("Tümü")
 
 elif sayfa == "Teklif Sepetim":
   st.subheader("🛒 Teklif Sepetiniz ve Proje Özeti")
@@ -652,7 +685,8 @@ elif sayfa == "Yönetim Paneli":
       y_stk = st.number_input(
           "Stok Miktarı", min_value=0, value=15, step=1
       )
-      y_ack = st.text_area("Ürün Açıklaması / Teknik Detaylar")
+      y_ack = st.text_area("Ürün Açıklaması")
+      y_tek = st.text_area("Teknik Veriler (Madde madde alt alta yazın)")
       y_grs = st.text_input(
           "Görsel URL Bağlantısı",
           value=(
@@ -674,6 +708,7 @@ elif sayfa == "Yönetim Paneli":
               "fiyat_usd": y_fiy,
               "stok": y_stk,
               "aciklama": y_ack,
+              "teknik": y_tek,
               "gorsel": (
                   y_grs
                   if y_grs.startswith("http")
@@ -689,13 +724,13 @@ elif sayfa == "Yönetim Paneli":
 
     # --- MEVCUT ÜRÜNLERİ DÜZENLEME VE TAM YÖNETİMİ ---
     st.markdown(
-        "### 🛠️ Mevcut Ürünlerin Tam Düzenlenmesi (Fiyat, Stok, Kategori ve"
-        " Görsel)"
+        "### 🛠️ Mevcut Ürünlerin Tam Düzenlenmesi (Fiyat, Stok, Teknik Veri"
+        " ve Görsel)"
     )
     st.write(
-        "Aşağıdaki alanlardan dilediğiniz ürünün adını, kategorisini, fiyatını,"
-        " stok miktarını, açıklamasını ve görsel linkini anlık olarak"
-        " güncelleyebilir veya ürünü tamamen silebilirsiniz."
+        "Aşağıdaki alanlardan dilediğiniz ürünün bilgilerini, teknik"
+        " verilerini, fiyatını ve stok miktarını güncelleyebilir veya ürünü"
+        " silebilirsiniz."
     )
 
     for idx, urun in enumerate(st.session_state.urunler_db):
@@ -777,6 +812,13 @@ elif sayfa == "Yönetim Paneli":
               key=f"ack_input_{urun['id']}",
           )
           st.session_state.urunler_db[idx]["aciklama"] = yeni_ack_input
+
+          yeni_tek_input = st.text_area(
+              f"Teknik Veriler ID:{urun['id']}",
+              value=urun.get("teknik", ""),
+              key=f"tek_input_{urun['id']}",
+          )
+          st.session_state.urunler_db[idx]["teknik"] = yeni_tek_input
 
           if st.button(
               f"🗑️ Bu Ürünü Sistemden Sil ID:{urun['id']}",
