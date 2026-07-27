@@ -45,7 +45,7 @@ if "aktif_detay_urun" not in st.session_state:
 if "ana_sayfa_kategori" not in st.session_state:
   st.session_state.ana_sayfa_kategori = "Tümü"
 
-# --- ZENGİNLEŞTİRİLMİŞ ÜRÜN VE EKİPMAN KATALOĞU (GÖRSELLERİ İLE BİRLİKTE) ---
+# Ürün ve Ekipman Kataloğu
 if "urunler_db" not in st.session_state:
   st.session_state.urunler_db = [
       {
@@ -214,7 +214,7 @@ if "urunler_db" not in st.session_state:
   ]
 
 # ---------------------------------------------------------
-# PROTIME MÜHENDİSLİK KURUMSAL CSS VE ARKA PLAN GÖRSELİ
+# PROTIME MÜHENDİSLİK KURUMSAL CSS VE ÖZEL KUTU TASARIMI
 # ---------------------------------------------------------
 st.markdown(
     """
@@ -224,7 +224,7 @@ st.markdown(
     }
     
     .stApp {
-        background-image: linear-gradient(rgba(11, 19, 43, 0.88), rgba(18, 30, 60, 0.88)), 
+        background-image: linear-gradient(rgba(11, 19, 43, 0.90), rgba(18, 30, 60, 0.90)), 
                           url("https://images.unsplash.com/photo-1497440001374-f26997328c1b?q=80&w=1920&auto=format&fit=crop");
         background-size: cover;
         background-position: center;
@@ -255,35 +255,37 @@ st.markdown(
     }
 
     .hero-container {
-        background: linear-gradient(135deg, rgba(13, 37, 63, 0.88) 0%, rgba(26, 75, 132, 0.88) 100%);
+        background: linear-gradient(135deg, #0d253f 0%, #1a4b84 100%);
         padding: 3rem 2rem;
         border-radius: 12px;
         color: white;
         text-align: center;
         margin-bottom: 2rem;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        border: 1px solid #2c5282;
     }
+    
+    /* SAYDAM OLMAYAN, BELİRGİN ÇERÇEVELİ ÜRÜN KUTULARI */
     .product-box {
-        background: rgba(18, 43, 75, 0.70);
+        background-color: #102a43 !important;
         padding: 1.2rem;
         border-radius: 10px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
         margin-bottom: 1.5rem;
         border-top: 4px solid #f39c12;
-        border-left: 1px solid rgba(255, 255, 255, 0.1);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        transition: transform 0.3s ease;
+        border-left: 2px solid #243b53;
+        border-right: 2px solid #243b53;
+        border-bottom: 2px solid #243b53;
+        transition: transform 0.3s ease, border-color 0.3s ease;
     }
     .product-box:hover {
         transform: translateY(-5px);
+        border-color: #f39c12;
     }
+    
     [data-testid="stSidebar"] {
-        background-color: rgba(10, 25, 47, 0.95);
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
+        background-color: #0b132b;
+        border-right: 1px solid #1c2541;
     }
     </style>
 """,
@@ -700,7 +702,7 @@ elif sayfa == "Yönetim Paneli":
       with st.container():
         st.markdown(
             f"""
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="background: #102a43; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #243b53;">
                     <b>Ürün ID:</b> {urun['id']}
                 </div>
             """,
