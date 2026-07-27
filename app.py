@@ -36,6 +36,9 @@ if "dolar_kur" not in st.session_state:
 if "yonetici_giris" not in st.session_state:
   st.session_state.yonetici_giris = False
 
+if "gelen_talepler" not in st.session_state:
+  st.session_state.gelen_talepler = []
+
 if "urunler_db" not in st.session_state:
   st.session_state.urunler_db = [
       {
@@ -111,7 +114,7 @@ if "urunler_db" not in st.session_state:
   ]
 
 # ---------------------------------------------------------
-# CSS TASARIM VE KESİN BUTON OKUNABİLİRLİK AYARLARI
+# CSS TASARIM VE KESİN BUTON GÖRÜNÜRLÜK AYARLARI
 # ---------------------------------------------------------
 st.markdown(
     """
@@ -127,15 +130,17 @@ st.markdown(
         color: #ffffff !important;
     }
     
-    /* Tüm Butonlar İçin Kesin Çözüm: Turuncu Arka Plan ve Beyaz Yazı */
+    /* Streamlit Butonlarının Okunmama Sorununa Kesin Çözüm */
     div.stButton > button, div.stFormSubmitButton > button {
         background-color: #f39c12 !important;
         color: #ffffff !important;
+        font-size: 16px !important;
         font-weight: bold !important;
         border: 2px solid #ffffff !important;
         border-radius: 8px !important;
-        padding: 0.5rem 1rem !important;
+        padding: 0.6rem 1.2rem !important;
         width: 100% !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
     div.stButton > button:hover, div.stFormSubmitButton > button:hover {
         background-color: #e67e22 !important;
@@ -363,7 +368,7 @@ elif sayfa == "Döviz Kuru Bilgisi":
     )
 
 # ---------------------------------------------------------
-# 4. İLETİŞİM & TALEP FORMU
+# 4. İLETİŞİM & TALEP FORMU (Yönetim Paneline Bildirim Gönderir)
 # ---------------------------------------------------------
 elif sayfa == "İletişim & Talep Formu":
   st.subheader("📍 İletişim ve Proje Başvurusu")
@@ -390,15 +395,23 @@ elif sayfa == "İletişim & Talep Formu":
 
     if st.button("Talebi Gönder"):
       if ad_input and tel_input:
+        # Yönetim paneline bildirim olarak kaydetme
+        zaman_str = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+        st.session_state.gelen_talepler.append({
+            "ad": ad_input,
+            "telefon": tel_input,
+            "detay": detay_input,
+            "tarih": zaman_str,
+        })
         st.success(
-            f"Teşekkürler {ad_input}, talebiniz sisteme kaydedilmiştir. En kısa"
-            " sürede sizinle iletişime geçilecektir."
+            f"Teşekkürler {ad_input}, talebiniz sisteme ve yönetim paneline"
+            " başarıyla iletildi!"
         )
       else:
         st.warning("Lütfen zorunlu alanları (Ad ve Telefon) doldurunuz.")
 
 # ---------------------------------------------------------
-# 5. YÖNETİM PANELİ (Giriş Korumalı)
+# 5. YÖNETİM PANELİ (Bildirimler ve Stok Kontrolü)
 # ---------------------------------------------------------
 elif sayfa == "Yönetim Paneli":
   st.subheader("🔐 PROTIME ERP - Yönetim Paneli Girişi")
@@ -423,6 +436,36 @@ elif sayfa == "Yönetim Paneli":
     if st.button("Oturumu Kapat"):
       st.session_state.yonetici_giris = False
       st.rerun()
+
+    st.markdown("---")
+
+    # --- MÜŞTERİ TALEP BİLDİRİMLERİ ---
+    st.markdown("### 🔔 Müşteri Proje ve Talep Bildirimleri")
+    if not st.session_state.gelen_talepler:
+      st.info(
+          "Henüz gelen yeni bir proje talep formu bulunmuyor."
+      )
+    else:
+      st.warning(
+          f"Toplam {len(st.session_state.gelen_talepler)} adet yeni talep"
+          " bulunmaktadır."
+      )
+      for idx, talep in enumerate(st.session_state.gelen_talepler):
+        with st.container():
+          st.markdown(
+              f"""
+                    <div style="background: rgba(243, 156, 18, 0.15); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #f39c12;">
+                        <b>Gönderen / Firma:</b> {talep['ad']} <br>
+                        <b>Telefon:</b> {talep['telefon']} <br>
+                        <b>Talep Detayı:</b> {talep['detay']} <br>
+                        <span style="font-size: 0.8rem; color: #bbb;">Tarih: {talep['tarih']}</span>
+                    </div>
+                """,
+              unsafe_allow_html=True,
+          )
+          if st.button(f"Talebi Sil / Arşivle {idx}", key=f"sil_talep_{idx}"):
+            st.session_state.gelen_talepler.pop(idx)
+            st.rerun()
 
     st.markdown("---")
     st.markdown("### 🛠️ Ürün ve Stok Kontrol Paneli")
