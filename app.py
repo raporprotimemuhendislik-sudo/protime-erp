@@ -45,6 +45,7 @@ if "aktif_detay_urun" not in st.session_state:
 if "ana_sayfa_kategori" not in st.session_state:
   st.session_state.ana_sayfa_kategori = "Tümü"
 
+# --- ZENGİNLEŞTİRİLMİŞ ÜRÜN VE EKİPMAN KATALOĞU (GÖRSELLERİ İLE BİRLİKTE) ---
 if "urunler_db" not in st.session_state:
   st.session_state.urunler_db = [
       {
@@ -63,6 +64,62 @@ if "urunler_db" not in st.session_state:
       },
       {
           "id": 2,
+          "ad": "PROTIME Akıllı Hibrit Inverter 5kW",
+          "kategori": "İnverterler",
+          "fiyat_usd": 950,
+          "stok": 25,
+          "aciklama": (
+              "Evsel ve küçük işletmeler için kompakt, yüksek verimli saf sinüs"
+              " inverter."
+          ),
+          "gorsel": (
+              "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 3,
+          "ad": "PROTIME Endüstriyel Üç Fazlı Inverter 30kW",
+          "kategori": "İnverterler",
+          "fiyat_usd": 3200,
+          "stok": 8,
+          "aciklama": (
+              "Fabrikalar ve büyük tarımsal sulama projeleri için endüstriyel"
+              " güç."
+          ),
+          "gorsel": (
+              "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 4,
+          "ad": "Monokristal Solar Panel 550W PERC",
+          "kategori": "Paneller",
+          "fiyat_usd": 135,
+          "stok": 120,
+          "aciklama": (
+              "Yüksek verimli PERC teknoloji güneş paneli. Düşük ışıkta"
+              " maksimum güç üretimi."
+          ),
+          "gorsel": (
+              "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 5,
+          "ad": "Monokristal Bifacial Solar Panel 580W",
+          "kategori": "Paneller",
+          "fiyat_usd": 155,
+          "stok": 90,
+          "aciklama": (
+              "Çift yüzlü ışık alabilme özelliği ile standart panellere göre"
+              " %20 daha fazla verim."
+          ),
+          "gorsel": (
+              "https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=800&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 6,
           "ad": "PROTIME Lityum İyon Akü Grubu 5kWh",
           "kategori": "Akü Grupları",
           "fiyat_usd": 1200,
@@ -76,7 +133,49 @@ if "urunler_db" not in st.session_state:
           ),
       },
       {
-          "id": 3,
+          "id": 7,
+          "ad": "PROTIME Lityum İyon Akü Grubu 10kWh",
+          "kategori": "Akü Grupları",
+          "fiyat_usd": 2300,
+          "stok": 12,
+          "aciklama": (
+              "Yüksek kapasiteli depolama ünitesi, akıllı BMS koruma"
+              " sistemli."
+          ),
+          "gorsel": (
+              "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=800&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 8,
+          "ad": "PROTIME 5kW Kurulu GES Paketi (Villa / Tarla)",
+          "kategori": "Kurulu GES Sistemleri",
+          "fiyat_usd": 3800,
+          "stok": 8,
+          "aciklama": (
+              "Inverter, akü ve paneller dahil komple villa/tarla paket"
+              " sistemi. Anahtar teslim çözüm."
+          ),
+          "gorsel": (
+              "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=800&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 9,
+          "ad": "PROTIME 10kW Ticari Çatı Kurulu GES Paketi",
+          "kategori": "Kurulu GES Sistemleri",
+          "fiyat_usd": 7500,
+          "stok": 5,
+          "aciklama": (
+              "İşletmeler ve fabrikalar için anahtar teslim yüksek verimli"
+              " paket sistem."
+          ),
+          "gorsel": (
+              "https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=800&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 10,
           "ad": "Solar DC Kablo 6mm (100m Top)",
           "kategori": "Bağlantı Ekipmanları",
           "fiyat_usd": 110,
@@ -89,7 +188,7 @@ if "urunler_db" not in st.session_state:
           ),
       },
       {
-          "id": 4,
+          "id": 11,
           "ad": "Solar Pompa Sürücüsü 7.5kW",
           "kategori": "Sürücü Grupları",
           "fiyat_usd": 450,
@@ -102,21 +201,7 @@ if "urunler_db" not in st.session_state:
           ),
       },
       {
-          "id": 5,
-          "ad": "Monokristal Solar Panel 550W",
-          "kategori": "Paneller",
-          "fiyat_usd": 135,
-          "stok": 100,
-          "aciklama": (
-              "Yüksek verimli PERC teknoloji güneş paneli. Düşük ışıkta"
-              " maksimum güç üretimi."
-          ),
-          "gorsel": (
-              "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
-          ),
-      },
-      {
-          "id": 6,
+          "id": 12,
           "ad": "AC/DC Koruma Kutusu (Kombinör)",
           "kategori": "Bağlantı Ekipmanları",
           "fiyat_usd": 220,
@@ -124,34 +209,6 @@ if "urunler_db" not in st.session_state:
           "aciklama": "Sigortalı ve surge arrestörlü komple koruma panosu.",
           "gorsel": (
               "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop"
-          ),
-      },
-      {
-          "id": 7,
-          "ad": "PROTIME 5kW Kurulu GES Paketi",
-          "kategori": "Kurulu GES Sistemleri",
-          "fiyat_usd": 3800,
-          "stok": 8,
-          "aciklama": (
-              "Inverter, akü ve paneller dahil komple villa/tarla paket"
-              " sistemi. Anahtar teslim çözüm."
-          ),
-          "gorsel": (
-              "https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=800&auto=format&fit=crop"
-          ),
-      },
-      {
-          "id": 8,
-          "ad": "PROTIME 10kW Ticari Çatı Kurulu GES Paketi",
-          "kategori": "Kurulu GES Sistemleri",
-          "fiyat_usd": 7500,
-          "stok": 5,
-          "aciklama": (
-              "İşletmeler ve fabrikalar için anahtar teslim yüksek verimli"
-              " paket sistem."
-          ),
-          "gorsel": (
-              "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=800&auto=format&fit=crop"
           ),
       },
   ]
@@ -162,12 +219,10 @@ if "urunler_db" not in st.session_state:
 st.markdown(
     """
     <style>
-    /* Üst kısımdaki beyaz şeritleri ve varsayılan header alanlarını şeffaflaştır */
     header[data-testid="stHeader"] {
         background: transparent !important;
     }
     
-    /* Solinved Benzeri Geniş Açı Solar Panel Kurumsal Arka Plan */
     .stApp {
         background-image: linear-gradient(rgba(11, 19, 43, 0.88), rgba(18, 30, 60, 0.88)), 
                           url("https://images.unsplash.com/photo-1497440001374-f26997328c1b?q=80&w=1920&auto=format&fit=crop");
