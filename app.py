@@ -111,7 +111,7 @@ if "urunler_db" not in st.session_state:
   ]
 
 # ---------------------------------------------------------
-# CSS TASARIM VE GÜNEŞ PANELLİ ARKA PLAN
+# CSS TASARIM VE BUTON DÜZENLEMELERİ
 # ---------------------------------------------------------
 st.markdown(
     """
@@ -126,6 +126,20 @@ st.markdown(
     h1, h2, h3, h4, h5, h6, p, span, label {
         color: #ffffff !important;
     }
+    
+    /* Butonların Okunabilirliği İçin Özel Renk Ayarları */
+    .stButton>button {
+        background-color: #f39c12 !important;
+        color: #ffffff !important;
+        font-weight: bold !important;
+        border: none !important;
+        border-radius: 6px !important;
+    }
+    .stButton>button:hover {
+        background-color: #e67e22 !important;
+        color: #ffffff !important;
+    }
+
     .hero-container {
         background: rgba(15, 32, 39, 0.75);
         padding: 3rem 1.5rem;
@@ -159,7 +173,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# NAVİGASYON (YÖNETİM PANELİ EN ÜSTTE)
+# NAVİGASYON
 # ---------------------------------------------------------
 st.sidebar.title("☀️ PROTIME ERP")
 nav_secenekleri = [
@@ -184,7 +198,7 @@ st.sidebar.caption(
 )
 
 # ---------------------------------------------------------
-# 1. YÖNETİM PANELİ (Giriş Korumalı & Tam Kontrol)
+# 1. YÖNETİM PANELİ
 # ---------------------------------------------------------
 if sayfa == "Yönetim Paneli":
   st.subheader("🔐 PROTIME ERP - Yönetim Paneli Girişi")
@@ -213,7 +227,6 @@ if sayfa == "Yönetim Paneli":
     st.markdown("---")
     st.markdown("### 🛠️ Ürün ve Stok Kontrol Paneli")
 
-    # Yeni Ürün Ekleme / Stok Güncelleme Bölümü
     with st.expander("➕ Yeni Ürün Ekle / Stok Güncelle"):
       yeni_ad = st.text_input("Ürün Adı")
       yeni_kategori = st.selectbox(
@@ -232,7 +245,7 @@ if sayfa == "Yönetim Paneli":
       )
       yeni_aciklama = st.text_area("Ürün Açıklaması")
       yeni_gorsel = st.text_input(
-          "Görsel URL (İsteğe bağlı, boş bırakılabilir)",
+          "Görsel URL",
           value=(
               "https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=600&auto=format&fit=crop"
           ),
