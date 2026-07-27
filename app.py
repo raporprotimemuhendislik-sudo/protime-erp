@@ -1,334 +1,359 @@
+import datetime
 import streamlit as st
-import requests
-import sqlite3
-import io
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
 
-st.set_page_config(page_title="PROTIME ERP", layout="wide")
+# Sayfa Yapılandırması (Mobil ve Masaüstü Uyumlu)
+st.set_page_config(
+    page_title="PROTIME ERP & Solinved - Akıllı Enerji Sistemleri",
+    page_icon="☀️",
+    layout="wide",
+)
 
-# --- VERİTABANI ---
-def get_db_connection():
-    conn = sqlite3.connect("protime_erp_final.db", check_same_thread=False)
-    conn.execute("CREATE TABLE IF NOT EXISTS urunler (id INTEGER PRIMARY KEY AUTOINCREMENT, modul TEXT, marka TEXT, urun_adi TEXT, fiyat REAL)")
-    conn.execute("CREATE TABLE IF NOT EXISTS yapılacaklar_v2 (id INTEGER PRIMARY KEY AUTOINCREMENT, is_tanimi TEXT, durum INTEGER DEFAULT 0)")
-    return conn
-
-# --- BAŞLANGIÇ VERİLERİNİ GÜNCELLEME VE YÜKLEME ---
-def katalog_urunlerini_ekle():
-    conn = get_db_connection()
+# ---------------------------------------------------------
+# CSS TASARIM VE GÜNEŞ PANELLİ ARKA PLAN (Solinved & PROTIME)
+# ---------------------------------------------------------
+st.markdown(
+    """
+    <style>
+    /* Genel Sayfa Arka Planı ve Güneş Paneli Görseli */
+    .stApp {
+        background-image: linear-gradient(rgba(15, 32, 39, 0.85), rgba(44, 83, 100, 0.85)), 
+                          url("https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=1920&auto=format&fit=crop");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
     
-    # GES Ürünleri Kontrolü ve Yüklemesi
-    sayi_ges = conn.execute("SELECT COUNT(*) FROM urunler WHERE modul='GES'").fetchone()[0]
-    if sayi_ges == 0:
-        ges_urunleri = [
-            ("GES", "SOLINVED", "1.2 KW MPPT AKILLI İNVERTER", 132.61),
-            ("GES", "SOLINVED", "3.6KW 24V MPPT AKILLI İNVERTER", 206.28),
-            ("GES", "SOLINVED", "5 KW 24V MPPT AKILLI İNVERTER", 284.87),
-            ("GES", "SOLINVED", "6.5 KW 48V MPPT AKILLI İNVERTER", 304.51),
-            ("GES", "SOLINVED", "8.2 KW MPPT AKILLI İNVERTER", 491.15),
-            ("GES", "SOLINVED", "12 KW MPPT AKILLI İNVERTER", 589.38),
-            ("GES", "SOLINVED", "ASPENDOS SERİSİ ALL IN ONE BATERY MODULE (5kWh)", 933.19),
-            ("GES", "SOLINVED", "ASPENDOS SERİSİ ALL IN ONE INVERTER MODULE (6KW-49V)", 392.92),
-            ("GES", "NEXDOUN", "4 KW 24V MPPT AKILLI İNVERTER", 249.48),
-            ("GES", "NEXDOUN", "6 KW 48V MPPT AKILLI İNVERTER", 374.22),
-            ("GES", "MERSON", "12 KW 48V MPPT AKILLI İNVERTER", 727.65),
-            ("GES", "VIGOR", "12V 100AH JEL AKÜ", 129.41),
-            ("GES", "SOLINVED", "12V 100Ah JEL AKÜ", 126.97),
-            ("GES", "SOLINVED", "12V 150Ah JEL AKÜ", 190.45),
-            ("GES", "SOLINVED", "12V 200Ah JEL AKÜ", 253.94),
-            ("GES", "SOLINVED", "12.8 V 100Ah LITYUM AKÜ", 270.13),
-            ("GES", "SOLINVED", "25.6 V 100Ah EFES LİTYUM AKÜ", 491.15),
-            ("GES", "SOLINVED", "25.6 V 200Ah EFES LİTYUM AKÜ", 834.96),
-            ("GES", "SOLINVED", "51,2 V 100Ah KAPADOKYA LİTYUM AKÜ", 884.07),
-            ("GES", "SOLINVED", "51.2V 100AH LİTYUMBAKÜ KABLOSU", 29.47),
-            ("GES", "SOLINVED", "51.2V 314AH HİTİT SERİSİ LİTYUM AKÜ", 2259.29),
-            ("GES", "SOLINVED", "102,4 V 100Ah Lithium Duvar Tipi - Serilenebilir", 1964.60),
-            ("GES", "SOLINVED", "XH CONTROL BOX", 884.07),
-            ("GES", "MEXSUN", "12.8V 200AH LITYUM AKU", 554.40),
-            ("GES", "MEXSUN", "12.8V 300AH LİTYUM AKÜ", 658.35),
-            ("GES", "SOLINVED", "CM04 4G KAMERA", 62.70),
-            ("GES", "SOLINVED", "CM22 WİFİ KAMERA", 70.54),
-            ("GES", "SOLINVED", "22 kW RADIUS MODEL AC CHARGER", 401.28),
-            ("GES", "SOLINVED", "3 HP 1.5kW 150-440v 1x220", 142.43),
-            ("GES", "SOLINVED", "3 HP 2.2KW 150-440V 1X220", 225.93),
-            ("GES", "SOLINVED", "5.5HP 4KW 150-440V 1X220", 250.49),
-            ("GES", "SOLINVED", "3 HP 2.2KW 150-440V 3X220", 132.61),
-            ("GES", "SOLINVED", "5.5 HP 4KW 3X220", 196.46),
-            ("GES", "SOLINVED", "2 HP 1.5kW 250-900V", 145.87),
-            ("GES", "SOLINVED", "3 HP 2.2kW 250-900V", 152.26),
-            ("GES", "SOLINVED", "5.5 HP 4kW 250-900V", 176.81),
-            ("GES", "SOLINVED", "7.5 HP 5.5kW 250-900V", 235.75),
-            ("GES", "SOLINVED", "10 HP 7.5kW 250-900V", 255.40),
-            ("GES", "SOLINVED", "15 HP 11kW 250-900V", 333.98),
-            ("GES", "SOLINVED", "20 HP 15kW 250-900V", 373.27),
-            ("GES", "SOLINVED", "25 HP 18.5kW 250-900V", 471.50),
-            ("GES", "SOLINVED", "30 HP 22kW 250-900V", 540.27),
-            ("GES", "SOLINVED", "40 HP 30kW 250-900V", 736.73),
-            ("GES", "SOLINVED", "50 HP 37kW 250-900V", 884.07),
-            ("GES", "SOLINVED", "60 HP 45kW 250-900V", 1080.53),
-            ("GES", "SOLINVED", "70 HP 55kW 250-900V", 1276.99),
-            ("GES", "SOLINVED", "90 HP 75kW 250-900V", 1473.45),
-            ("GES", "SOLINVED", "110 HP 90kW 250-900V", 1915.49),
-            ("GES", "SOLINVED", "150 HP 110kw 250-900V", 1964.60),
-            ("GES", "SOLINVED", "160 HP 132kW 250-900V", 3045.13),
-            ("GES", "SOLINVED", "200 HP 160kW 250-900V", 3830.97),
-            ("GES", "SOLINVED", "225 HP 185kW 250-900V", 4469.47),
-            ("GES", "SOLINVED", "250 HP 200kW 250-900V", 4665.93),
-            ("GES", "SOLINVED", "48V 750W 3.8TON 95M (2X550W)", 176.81),
-            ("GES", "SOLINVED", "48V 400W 3.8TON 47M", 166.99),
-            ("GES", "SOLINVED", "48V 500W 1.7TON 109M", 176.81),
-            ("GES", "SOLINVED", "72V 1100W 6.5TON 86M (3X550W)", 206.28),
-            ("GES", "SOLINVED", "72V 1100W 3.8TON 123M", 201.37),
-            ("GES", "SOLINVED", "96V 1500W 6TON 125M", 211.19),
-            ("GES", "SOLINVED", "96V 1500W 6.5TON 135M (4X550W)", 216.11),
-            ("GES", "SOLINVED", "110V 1300W 3.8TON 155M", 294.69),
-            ("GES", "SOLINVED", "110V 1300W 6.5TON 112M", 304.51),
-            ("GES", "SOLINVED", "AC-DC 2200W 9.5TON 125M", 314.34),
-            ("GES", "SOLINVED", "AC-DC 2200W 22TON 70M", 348.72),
-            ("GES", "SOLINVED", "AC-DC 2200W 14TON 125M", 333.98),
-            ("GES", "SOLINVED", "1HP 750W 72V MAX 20M UZAKLIK", 128.21),
-            ("GES", "SOLINVED", "1.5HP 1100W 96V MAX 17M UZAKLIK", 135.14),
-            ("GES", "SOLINVED", "2HP 1500W 110V MAX 13M UZAKLIK", 155.93),
-            ("GES", "DEYE", "DEYE 5 KW STRING", 515.71),
-            ("GES", "DEYE", "DEYE 8 KW STRING", 525.53),
-            ("GES", "DEYE", "DEYE 10 KW STRING", 540.27),
-            ("GES", "DEYE", "DEYE 12 KW STRING", 564.82),
-            ("GES", "DEYE", "DEYE 15 KW STRING", 776.02),
-            ("GES", "DEYE", "DEYE 20 KW STRING", 859.51),
-            ("GES", "DEYE", "DEYE 25 KW STRING", 933.19),
-            ("GES", "DEYE", "DEYE 30 KW STRING", 1129.65),
-            ("GES", "DEYE", "DEYE 40 KW STRING", 1719.03),
-            ("GES", "DEYE", "DEYE 50 KW STRING", 2286.90),
-            ("GES", "DEYE", "DEYE 60 KW STRING", 2529.45),
-            ("GES", "DEYE", "DEYE 80 KW STRING", 2910.60),
-            ("GES", "DEYE", "DEYE 100 KW STRING", 3326.40),
-            ("GES", "DEYE", "DEYE WİFİ STICK", 58.94),
-            ("GES", "DEYE", "DEYE LAN STICK", 68.76),
-            ("GES", "DEYE", "MONO PHASE SMART METER", 44.20),
-            ("GES", "DEYE", "THREE PHASE SMART METER", 108.05),
-            ("GES", "DEYE", "DEYE 5KW MONOFAZE LV HİBRİT", 1031.42),
-            ("GES", "DEYE", "DEYE 6KW MONOFAZE LV HİBRİT", 1154.20),
-            ("GES", "DEYE", "DEYE 10KW MONOFAZE LV HİBRİT", 1964.60),
-            ("GES", "DEYE", "DEYE 16KW MONOFAZE LV HİBRİT", 2701.33),
-            ("GES", "DEYE", "DEYE 8KW TRİFAZE LV HİBRİT", 2161.06),
-            ("GES", "DEYE", "DEYE 10KW TRİFAZE LV HİBRİT", 2259.29),
-            ("GES", "DEYE", "DEYE 12KW TRİFAZE LV HİBRİT", 2357.52),
-            ("GES", "DEYE", "DEYE 15KW TRİFAZE LV HİBRİT", 2553.98),
-            ("GES", "DEYE", "DEYE 20KW TRİFAZE LV HİBRİT", 3438.05),
-            ("GES", "DEYE", "DEYE 10KW TRİFAZE HV HİBRİT", 1719.03),
-            ("GES", "DEYE", "DEYE 12KW TRİFAZE HV HİBRİT", 2062.83),
-            ("GES", "DEYE", "DEYE 15KW TRİFAZE HV HİBRİT", 2210.18),
-            ("GES", "DEYE", "DEYE 20KW TRİFAZE HV HİBRİT", 2357.52),
-            ("GES", "DEYE", "DEYE 25KW TRİFAZE HV HİBRİT", 2750.44),
-            ("GES", "DEYE", "DEYE 30KW TRİFAZE HV HİBRİT", 3830.97),
-            ("GES", "DEYE", "DEYE 40KW TRİFAZE HV HİBRİT", 5402.65),
-            ("GES", "DEYE", "DEYE 50KW TRİFAZE HV HİBRİT", 5893.80),
-            ("GES", "DEYE", "DEYE 80KW TRİFAZE HV HİBRİT", 8103.98)
-        ]
-        conn.executemany("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?, ?, ?, ?)", ges_urunleri)
-        conn.commit()
+    /* Metin Renklerinin Okunabilirliği İçin Düzenlemeler */
+    h1, h2, h3, h4, h5, h6, p, span, label {
+        color: #ffffff !important;
+    }
 
-    # Elektrik Ürünlerini Güncel/Eksiksiz Ekleme (Mükerrer olmaması için tabloyu temizleyip güncel listeyi basabiliriz veya kontrol edebiliriz)
-    # Mevcut elektrik ürünlerini temizleyip en güncel tam listeyi ekleyelim ki eksik kalmasın:
-    conn.execute("DELETE FROM urunler WHERE modul='ELEKTRIK'")
+    .hero-container {
+        background: rgba(15, 32, 39, 0.75);
+        padding: 3rem 1.5rem;
+        border-radius: 12px;
+        color: white;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+    }
     
-    zeybek_urunleri = [
-        ("ELEKTRIK", "Cata", "Ct-5223 Pars Kare Spot Siyah Kasa", 57.82),
-        ("ELEKTRIK", "Cata", "Ct-4221 3W Led Kapsül Ampul G9 220V / Günışığı", 36.70),
-        ("ELEKTRIK", "Cata", "Ct-4222 4W Led Kapsül Ampul G9 220V / Günışığı", 52.79),
-        ("ELEKTRIK", "Ledrox", "Hologram Fan 100 Cm 3D Video", 45600.00),
-        ("ELEKTRIK", "Ledrox", "Hologram Fan 65 Cm 3D Video", 25200.00),
-        ("ELEKTRIK", "Ledrox", "Hologram Fan 42 Cm 3D Video", 4500.00),
-        ("ELEKTRIK", "Cata", "Ct-5224 Pars Yuvarlak Siyah Kasa", 57.82),
-        ("ELEKTRIK", "Cata", "Ct-5258 6W Zebra Led Armatür (Siyah-Krom Kasa) 3 Renk", 40.22),
-        ("ELEKTRIK", "Cata", "Ct-4041 Etna Güç Kaynağı 300W", 5028.00),
-        ("ELEKTRIK", "Cata", "Ct-8640 Zen Sarkıt Led Armatür", 4022.40),
-        ("ELEKTRIK", "Cata", "Ct-7313 Nepal Solar Set Üstü 50W", 754.20),
-        ("ELEKTRIK", "Cata", "Ct-5333 30W Babil Ray Tipi Led Armatür Beyaz Kasa / Günışığı", 138.27),
-        ("ELEKTRIK", "Cata", "Ct-4650 300W Amazon Solar Led Projektör", 2262.60),
-        ("ELEKTRIK", "Cata", "Ct-5110 Tezgah Altı Priz Siyah Kasa / Günışığı", 263.97),
-        ("ELEKTRIK", "Cata", "Ct-4694 6W Gold Wallwasher 20 Cm / Amber", 628.50),
-        ("ELEKTRIK", "Cata", "Ct-3012 Kristal Led Tavan Armatür", 2891.10),
-        ("ELEKTRIK", "Fujiled", "12V COB Şerit Led 4000K 288 Ledli", 94.60),
-        ("ELEKTRIK", "Fujiled", "12V COB Şerit Led Günışığı 288 Ledli", 94.60),
-        ("ELEKTRIK", "Viko", "Karre Anahtar Beyaz - Çerçevesiz", 78.34),
-        ("ELEKTRIK", "Viko", "Karre Çocuk Korumalı Topraklı Priz Beyaz - Çerçevesiz", 128.11),
-        ("ELEKTRIK", "Viko", "Karre Kapaklı Topraklı Çocuk Korumalı Priz - Çerçevesiz", 138.72),
-        ("ELEKTRIK", "Viko", "Karre Dimmer 600W Beyaz - Çerçevesiz", 514.90),
-        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 2x1.5 mm", 1250.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 2x2.5 mm", 1950.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x1.5 mm", 1750.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x2.5 mm", 2800.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 3x4 mm", 4350.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 4x1.5 mm", 2350.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYM (TTR) Kablo 4x2.5 mm", 3750.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 1.5 mm", 650.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 2.5 mm", 1050.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 4 mm", 1680.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYA Tek Damar Kablo 6 mm", 2500.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYY Yeraltı Kablosu 3x1.5 mm", 2100.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYY Yeraltı Kablosu 3x2.5 mm", 3250.00),
-        ("ELEKTRIK", "Öznur Kablo", "NYY Yeraltı Kablosu 4x4 mm", 5900.00),
-        ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x4 mm² Solar Kablo (Kırmızı)", 14.50),
-        ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x4 mm² Solar Kablo (Siyah)", 14.50),
-        ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x6 mm² Solar Kablo (Kırmızı)", 21.00),
-        ("ELEKTRIK", "Solar Kablo", "H1Z2Z2-K 1x6 mm² Solar Kablo (Siyah)", 21.00),
-        ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 2.5 x 100 mm (100'lü Paket)", 45.00),
-        ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 3.6 x 200 mm (100'lü Paket)", 95.00),
-        ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 4.8 x 300 mm (100'lü Paket)", 185.00),
-        ("ELEKTRIK", "Cetinkaya", "Kablo Bağı 4.8 x 350 mm (100'lü Paket)", 220.00),
-        ("ELEKTRIK", "Caspian", "Wago Tip 3lü Kollu Wago Klemens (50'li Paket)", 320.00),
-        ("ELEKTRIK", "Caspian", "Wago Tip 5li Kollu Wago Klemens (50'li Paket)", 480.00),
-        ("ELEKTRIK", "Caspian", "Skor Klemens / Buat Klemensi 2.5 mm² (100'lü)", 150.00),
-        ("ELEKTRIK", "Caspian", "Sıkmalı Kablo Yüksüğü 1.5 mm² (100'lü Paket)", 65.00),
-        ("ELEKTRIK", "Caspian", "Sıkmalı Kablo Yüksüğü 2.5 mm² (100'lü Paket)", 85.00),
-        ("ELEKTRIK", "Caspian", "Delikli Boru Kelepçesi 1/2 inç", 12.50),
-        ("ELEKTRIK", "Caspian", "Delikli Boru Kelepçesi 3/4 inç", 15.00),
-        ("ELEKTRIK", "Caspian", "Plastik Spiral Boru 16 mm (50 Metre Top)", 450.00),
-        ("ELEKTRIK", "Caspian", "Plastik Spiral Boru 20 mm (50 Metre Top)", 580.00),
-        ("ELEKTRIK", "Caspian", "Duvaklı / Vidalı Dubel 8 mm (100'lü Paket)", 75.00),
-        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 2'li", 85.00),
-        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 4'lü", 120.00),
-        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 6'lı", 165.00),
-        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 9'lu", 230.00),
-        ("ELEKTRIK", "Kardeşler", "Sıva Üstü Şeffaf Kapaklı Sigorta Kutusu 12'li", 310.00),
-        ("ELEKTRIK", "Kardeşler", "Sıva Altı Şeffaf Kapaklı Sigorta Kutusu 12'li", 340.00),
-        ("ELEKTRIK", "Kardeşler", "Sıva Altı Şeffaf Kapaklı Sigorta Kutusu 24'lü", 650.00),
-        ("ELEKTRIK", "Sigma", "Boş Plastik Pano 20x30x13 cm (IP65)", 420.00),
-        ("ELEKTRIK", "Sigma", "Boş Plastik Pano 30x40x17 cm (IP65)", 680.00),
-        ("ELEKTRIK", "Sigma", "Boş Plastik Pano 40x50x20 cm (IP65)", 1050.00),
-        ("ELEKTRIK", "Sigma", "Boş Plastik Pano 50x60x22 cm (IP65)", 1550.00),
-        ("ELEKTRIK", "Caspian", "Plastik Buat Kutusu 8x8 cm (Klemensli)", 35.00),
-        ("ELEKTRIK", "Caspian", "Plastik Buat Kutusu 10x10 cm (Klemensli)", 48.00),
-        ("ELEKTRIK", "Caspian", "Plastik Buat Kutusu 12x12 cm (Klemensli)", 65.00)
-    ]
-    conn.executemany("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?, ?, ?, ?)", zeybek_urunleri)
-    conn.commit()
-    conn.close()
-
-# Otomatik olarak katalog verilerini veritabanına işleyelim
-katalog_urunlerini_ekle()
-
-# --- PDF OLUŞTURMA ---
-def pdf_olustur(paket, toplam, birim, kur=None):
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    styles = getSampleStyleSheet()
-    elements = [Paragraph("PROTIME FIYAT LISTESI", styles['Title'])]
+    .product-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        text-align: center;
+        margin-bottom: 1.5rem;
+        border-top: 4px solid #f39c12;
+        backdrop-filter: blur(8px);
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s ease;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
     
-    data = [["Marka", "Urun", "Fiyat"]]
-    for item in paket:
-        m = item['marka'].replace('İ', 'I').replace('ı', 'i').replace('Ş', 'S').replace('ş', 's').replace('Ç', 'C').replace('ç', 'c').replace('Ğ', 'G').replace('ğ', 'g').replace('Ü', 'U').replace('ü', 'u').replace('Ö', 'O').replace('ö', 'o')
-        u = item['urun'].replace('İ', 'I').replace('ı', 'i').replace('Ş', 'S').replace('ş', 's').replace('Ç', 'C').replace('ç', 'c').replace('Ğ', 'G').replace('ğ', 'g').replace('Ü', 'U').replace('ü', 'u').replace('Ö', 'O').replace('ö', 'o')
-        data.append([m, u, f"{item['fiyat']:.2f} {birim}"])
-    
-    data.append(["", "TOPLAM", f"{toplam:,.2f} {birim}"])
-    if kur: data.append(["", "TOPLAM TL", f"{(toplam*kur):,.2f} TL"])
-    
-    table = Table(data, colWidths=[150, 200, 100])
-    table.setStyle(TableStyle([('GRID', (0,0), (-1,-1), 0.5, colors.black), ('BACKGROUND', (0,0), (-1,0), colors.lightgrey)]))
-    elements.append(table)
-    doc.build(elements)
-    return buffer
+    /* Sidebar Tasarımı */
+    [data-testid="stSidebar"] {
+        background-color: rgba(15, 32, 39, 0.95);
+        backdrop-filter: blur(10px);
+    }
+    </style>
+""",
+    unsafe_allow_html=True,
+)
 
-# --- OTURUM ---
-if "usd_kuru" not in st.session_state: st.session_state.usd_kuru = 46.35
-if "paket_GES" not in st.session_state: st.session_state.paket_GES = []
-if "paket_ELEKTRIK" not in st.session_state: st.session_state.paket_ELEKTRIK = []
+# ---------------------------------------------------------
+# OTURUM DURUMU (SESSION STATE) TANIMLAMALARI
+# ---------------------------------------------------------
+if "sepet" not in st.session_state:
+    st.session_state.sepet = []
 
-# --- YAN MENÜ ---
-with st.sidebar:
-    st.title("PROTIME MÜHENDİSLİK")
-    
-    try:
-        res = requests.get("https://open.er-api.com/v6/latest/USD", timeout=3)
-        data_json = res.json()
-        if "rates" in data_json and "TRY" in data_json["rates"]:
-            st.session_state.usd_kuru = float(data_json["rates"]["TRY"])
-    except:
-        pass
+if "dolar_kur" not in st.session_state:
+    st.session_state.dolar_kur = 33.50  # Varsayılan Dolar Kuru
 
-    st.metric("📊 CANLI USD/TL", f"{st.session_state.usd_kuru:.4f}")
-    
-    secim = st.radio("DEPARTMAN", ["☀️ GES (USD)", "⚡ ELEKTRİK (TL)"])
-    aktif_modul = "GES" if "GES" in secim else "ELEKTRIK"
-    aktif_paket = st.session_state.paket_GES if aktif_modul == "GES" else st.session_state.paket_ELEKTRIK
-    
-    st.write("---")
-    st.subheader("⏳ BEKLEYEN İŞLER")
-    yeni_is = st.text_input("Yeni iş ekle...", key="yeni_is")
-    if st.button("Ekle") and yeni_is:
-        conn = get_db_connection()
-        conn.execute("INSERT INTO yapılacaklar_v2 (is_tanimi, durum) VALUES (?, 0)", (yeni_is,))
-        conn.commit(); conn.close(); st.rerun()
-    
-    conn = get_db_connection()
-    bekleyenler = conn.execute("SELECT id, is_tanimi FROM yapılacaklar_v2 WHERE durum=0").fetchall()
-    for row in bekleyenler:
-        c1, c2 = st.columns([4, 1])
-        c1.write(f"• {row[1]}")
-        if c2.button("✅", key=f"bekleyen_{row[0]}"):
-            conn.execute("UPDATE yapılacaklar_v2 SET durum=1 WHERE id=?", (row[0],)); conn.commit(); st.rerun()
+# ---------------------------------------------------------
+# ÜRÜN KATALOĞU (GES & Elektrik Departmanı)
+# ---------------------------------------------------------
+urunler_db = [
+    {
+        "id": 1,
+        "ad": "Solinved Akıllı Hibrit İnverter 10kW",
+        "kategori": "İnverterler",
+        "fiyat_usd": 1450,
+        "aciklama": "Yüksek verimli tam sinüs hibrit invertör çözümleri.",
+    },
+    {
+        "id": 2,
+        "ad": "Solinved Lityum İyon Akü Grubu 5kWh",
+        "kategori": "Akü Grupları",
+        "fiyat_usd": 1200,
+        "aciklama": "Uzun ömürlü, güvenli ve modüler enerji depolama sistemleri.",
+    },
+    {
+        "id": 3,
+        "ad": "Solar DC Kablo 6mm (100m Top)",
+        "kategori": "Bağlantı Ekipmanları",
+        "fiyat_usd": 110,
+        "aciklama": "TUV sertifikalı, güneşe dayanıklı fotovoltaik kablo.",
+    },
+    {
+        "id": 4,
+        "ad": "Solar Pompa Sürücüsü 7.5kW",
+        "kategori": "Sürücü Grupları",
+        "fiyat_usd": 450,
+        "aciklama": "Tarımsal sulama ve endüstriyel su pompaları için özel sürücü.",
+    },
+    {
+        "id": 5,
+        "ad": "Monokristal Solar Panel 550W",
+        "kategori": "Paneller",
+        "fiyat_usd": 135,
+        "aciklama": "Yüksek verimli PERC teknoloji güneş paneli.",
+    },
+    {
+        "id": 6,
+        "ad": "AC/DC Koruma Kutusu (Kombinör)",
+        "kategori": "Bağlantı Ekipmanları",
+        "fiyat_usd": 220,
+        "aciklama": "Sigortalı ve surge arrestörlü komple koruma panosu.",
+    },
+]
 
-    st.write("---")
-    st.subheader("📋 YAPILACAK İŞLER")
-    yapilacaklar = conn.execute("SELECT id, is_tanimi FROM yapılacaklar_v2 WHERE durum=1").fetchall()
-    for row in yapilacaklar:
-        c1, c2 = st.columns([4, 1])
-        c1.write(f"✓ {row[1]}")
-        if c2.button("🗑️", key=f"sil_{row[0]}"):
-            conn.execute("DELETE FROM yapılacaklar_v2 WHERE id=?", (row[0],)); conn.commit(); st.rerun()
-    conn.close()
+# ---------------------------------------------------------
+# ÜST MENÜ & YÖNETİM PANELİ (Sidebar)
+# ---------------------------------------------------------
+st.sidebar.title("⚙️ PROTIME ERP & Sistem")
+sayfa = st.sidebar.radio(
+    "Navigasyon",
+    [
+        "GES Katalog & Ürünler",
+        "Teklif & Sepet",
+        "Yönetim / Kur & Fiyat Ayarları",
+        "İletişim & Proje Talebi",
+    ],
+)
 
-# --- ANA İÇERİK ---
-st.title(f"{aktif_modul} İSTASYONU")
-arama = st.text_input("🔍 Ürün veya marka ara...")
-c1, c2 = st.columns([2, 1])
+st.sidebar.markdown("---")
+st.sidebar.subheader("💱 Canlı / Anlık Kur Paneli")
+guncel_kur = st.sidebar.number_input(
+    "Dolar Kuru (TL)",
+    min_value=1.0,
+    value=st.session_state.dolar_kur,
+    step=0.1,
+    format="%.2f",
+)
+st.session_state.dolar_kur = guncel_kur
+st.sidebar.caption(
+    f"Son Güncelleme: {datetime.datetime.now().strftime('%d.%m.%Y %H:%M')}"
+)
 
-with c1:
-    st.subheader("📦 Katalog")
-    with st.container(height=400):
-        conn = get_db_connection()
-        sorgu = "SELECT id, marka, urun_adi, fiyat FROM urunler WHERE modul=? AND (marka LIKE ? OR urun_adi LIKE ?)"
-        for r in conn.execute(sorgu, (aktif_modul, f"%{arama}%", f"%{arama}%")).fetchall():
-            cols = st.columns([3, 2, 1, 1])
-            cols[0].write(f"{r[1]} - {r[2]}")
-            cols[1].write(f"{r[3]} {'$' if aktif_modul=='GES' else 'TL'}")
-            if cols[2].button("🗑️", key=f"del_{r[0]}"):
-                conn.execute("DELETE FROM urunler WHERE id=?", (r[0],)); conn.commit(); st.rerun()
-            if cols[3].button("➕", key=f"add_{r[0]}"):
-                aktif_paket.append({"marka": r[1], "urun": r[2], "fiyat": r[3]})
-                st.rerun()
-        conn.close()
+# ---------------------------------------------------------
+# SAYFA 1: GES KATALOG & ÜRÜNLER
+# ---------------------------------------------------------
+if sayfa == "GES Katalog & Ürünler":
+    st.markdown(
+        """
+        <div class="hero-container">
+            <h1 style="font-size: 2.5rem; margin-bottom: 10px; color: #ffffff !important;">PROTIME ERP - Güneş Enerjisi Sistemleri</h1>
+            <p style="font-size: 1.1rem; color: #e0e0e0 !important;">Yüksek verimli invertörler, lityum aküler ve profesyonel GES bileşenleri yönetim paneli.</p>
+        </div>
+    """,
+        unsafe_allow_html=True,
+    )
 
-with c2:
-    st.subheader("➕ Yeni Ürün")
-    with st.form("yeni", clear_on_submit=True):
-        m = st.text_input("Marka"); t = st.text_input("Ürün"); f = st.number_input("Fiyat")
-        if st.form_submit_button("Kaydet"):
-            conn = get_db_connection()
-            conn.execute("INSERT INTO urunler (modul, marka, urun_adi, fiyat) VALUES (?,?,?,?)", (aktif_modul, m, t, f))
-            conn.commit(); conn.close(); st.rerun()
+    col_f1, col_f2 = st.columns([2, 2])
+    with col_f1:
+        kategori_secim = st.selectbox(
+            "Kategori Filtrele",
+            [
+                "Tümü",
+                "İnverterler",
+                "Akü Grupları",
+                "Bağlantı Ekipmanları",
+                "Sürücü Grupları",
+                "Paneller",
+            ],
+        )
+    with col_f2:
+        arama_metni = st.text_input(
+            "🔍 Ürün Ara", placeholder="Ürün adı yazın..."
+        )
 
-# --- HAKEDİŞ ---
-st.subheader(f"📊 {aktif_modul} Hakediş Paketi")
-if aktif_paket:
-    toplam = sum(i["fiyat"] for i in aktif_paket)
-    for i, item in enumerate(aktif_paket):
-        st.write(f"✅ {item['marka']} | {item['urun']} | {item['fiyat']}")
-    
-    if aktif_modul == "GES":
-        st.info(f"💰 TOPLAM: ${toplam:,.2f} | ₺{(toplam * st.session_state.usd_kuru):,.2f} TL")
+    st.markdown("### 📦 Ürün Listesi ve Katalog")
+
+    col1, col2, col3 = st.columns(3)
+    kolonlar = [col1, col2, col3]
+
+    gorunen_urun_sayisi = 0
+    for index, urun in enumerate(urunler_db):
+        if kategori_secim != "Tümü" and urun["kategori"] != kategori_secim:
+            continue
+        if (
+            arama_metni
+            and arama_metni.lower() not in urun["ad"].lower()
+            and arama_metni.lower() not in urun["aciklama"].lower()
+        ):
+            continue
+
+        fiyat_tl = urun["fiyat_usd"] * st.session_state.dolar_kur
+        hedef_kolon = kolonlar[gorunen_urun_sayisi % 3]
+        gorunen_urun_sayisi += 1
+
+        with hedef_kolon:
+            st.markdown(
+                f"""
+                <div class="product-card">
+                    <span style="background: rgba(44, 83, 100, 0.8); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; color: #fff; font-weight: bold;">{urun["kategori"]}</span>
+                    <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 10px;">{urun["ad"]}</h3>
+                    <p style="color: #dddddd; font-size: 0.85rem; min-height: 40px;">{urun["aciklama"]}</p>
+                    <h4 style="color: #f39c12; margin: 5px 0;">${urun["fiyat_usd"]:,} <span style="font-size: 0.8rem; color: #bbb;">(USD)</span></h4>
+                    <p style="color: #2ecc71; font-size: 1rem; font-weight: bold;">₺{fiyat_tl:,.2f} <span style="font-size: 0.75rem; color: #bbb;">(KDV Hariç)</span></p>
+                </div>
+            """,
+                unsafe_allow_html=True,
+            )
+
+            if st.button(f"➕ Sepete / Teklife Ekle", key=f"ekle_{urun['id']}"):
+                st.session_state.sepet.append(
+                    {
+                        "id": urun["id"],
+                        "ad": urun["ad"],
+                        "fiyat_usd": urun["fiyat_usd"],
+                        "fiyat_tl": fiyat_tl,
+                    }
+                )
+                st.success(f"'{urun['ad']}' sepete eklendi!")
+
+    if gorunen_urun_sayisi == 0:
+        st.info("Aradığınız kriterlere uygun ürün bulunamadı.")
+
+# ---------------------------------------------------------
+# SAYFA 2: TEKLİF & SEPET YÖNETİMİ
+# ---------------------------------------------------------
+elif sayfa == "Teklif & Sepet":
+    st.subheader("🛒 Oluşturulan Teklif ve Sepet Detayları")
+
+    if not st.session_state.sepet:
+        st.info("Sepetinizde henüz ürün bulunmuyor. Katalogdan ürün ekleyebilirsiniz.")
     else:
-        st.info(f"💰 TOPLAM: {toplam:,.2f} TL")
-        
-    kur_val = st.session_state.usd_kuru if aktif_modul == "GES" else None
-    pdf_buf = pdf_olustur(aktif_paket, toplam, "$" if aktif_modul == "GES" else "TL", kur_val)
-    st.download_button("📄 PDF İNDİR", pdf_buf, "hakedis.pdf", "application/pdf")
-    if st.button("Listeyi Temizle"):
-        if aktif_modul == "GES": st.session_state.paket_GES = []
-        else: st.session_state.paket_ELEKTRIK = []
-        st.rerun()
+        toplam_usd = 0
+        toplam_tl = 0
+
+        for i, item in enumerate(st.session_state.sepet):
+            col_s1, col_s2, col_s3 = st.columns([3, 2, 1])
+            with col_s1:
+                st.write(f"**{item['ad']}**")
+            with col_s2:
+                guncel_item_tl = item["fiyat_usd"] * st.session_state.dolar_kur
+                st.write(
+                    f"${item['fiyat_usd']:,} ($) | ₺{guncel_item_tl:,.2f} (₺)"
+                )
+            with col_s3:
+                if st.button("🗑️ Sil", key=f"sil_{i}"):
+                    st.session_state.sepet.pop(i)
+                    st.rerun()
+
+            toplam_usd += item["fiyat_usd"]
+            toplam_tl += item["fiyat_usd"] * st.session_state.dolar_kur
+
+        st.markdown("---")
+        col_t1, col_t2 = st.columns(2)
+        with col_t1:
+            st.metric(
+                label="Toplam Tutar (USD)", value=f"${toplam_usd:,.2f}"
+            )
+        with col_t2:
+            st.metric(label="Toplam Tutar (TL)", value=f"₺{toplam_tl:,.2f}")
+
+        st.markdown("### 📄 Proforma / Teklif Oluştur")
+        musteri_adi = st.text_input("Müşteri / Firma Adı")
+        yetkili_kisi = st.text_input("Yetkili Kişi", value="EFE CEYLAN")
+
+        if st.button("Teklif Belgesi Hazırla"):
+            if musteri_adi:
+                st.success(
+                    f"Sayın {yetkili_kisi} ({musteri_adi}) için teklif başarıyla oluşturuldu!"
+                )
+                st.info(
+                    f"Genel Toplam: ₺{toplam_tl:,.2f} ($ {toplam_usd:,.2f} - Kur: {st.session_state.dolar_kur})"
+                )
+            else:
+                st.warning("Lütfen müşteri veya firma adını giriniz.")
+
+        if st.button("Sepeti Temizle"):
+            st.session_state.sepet = []
+            st.rerun()
+
+# ---------------------------------------------------------
+# SAYFA 3: YÖNETİM / KUR VE FİYAT AYARLARI
+# ---------------------------------------------------------
+elif sayfa == "Yönetim / Kur & Fiyat Ayarları":
+    st.subheader("⚙️ PROTIME ERP - Sistem ve Fiyat Yönetimi")
+    st.write(
+        "Bu ekrandan döviz kuruna bağlı olarak tüm GES bileşenlerinin güncel maliyet yansımalarını kontrol edebilirsiniz."
+    )
+
+    st.markdown("### 📊 Mevcut Kur Durumu")
+    st.info(
+        f"Sistemde aktif tanımlı Dolar Kuru: **{st.session_state.dolar_kur} TL**"
+    )
+
+    yeni_kur_girdisi = st.number_input(
+        "Yeni Dolar Kurunu Güncelle",
+        value=st.session_state.dolar_kur,
+        step=0.05,
+    )
+    if st.button("Kuru Uygula ve Fiyatları Güncelle"):
+        st.session_state.dolar_kur = yeni_kur_girdisi
+        st.success(
+            f"Dolar kuru başarıyla {yeni_kur_girdisi} TL olarak güncellendi! Tüm katalog fiyatları yeniden hesaplandı."
+        )
+
+    st.markdown("### 📋 Sistem Katalog Veritabanı (Özet)")
+    for u in urunler_db:
+        hesaplanan_tl = u["fiyat_usd"] * st.session_state.dolar_kur
+        st.write(
+            f"- **{u['ad']}** | Liste Fiyatı: ${u['fiyat_usd']} | Satış Fiyatı: ₺{hesaplanan_tl:,.2f}"
+        )
+
+# ---------------------------------------------------------
+# SAYFA 4: İLETİŞİM & PROJE TALEBİ
+# ---------------------------------------------------------
+elif sayfa == "İletişim & Proje Talebi":
+    st.subheader("📍 İletişim ve GES Proje Başvurusu")
+
+    col_i1, col_i2 = st.columns(2)
+
+    with col_i1:
+        st.markdown(
+            """
+            **Şirket Bilgileri:**
+            * **Yetkili:** Efe Ceylan
+            * **Faaliyet Alanı:** Güneş Enerjisi Sistemleri (GES) & Elektrik Mühendisliği
+            * **E-posta:** bilgi@solinvedornegi.com
+            * **Telefon:** +90 (312) 000 00 00
+            * **Konum:** Ankara / Türkiye
+        """
+        )
+
+    with col_i2:
+        st.markdown("### 💬 Hızlı Proje Talep Formu")
+        ad_input = st.text_input("Ad Soyad / Firma")
+        tel_input = st.text_input("Telefon Numarası")
+        detay_input = st.text_area("Proje Detayları / İhtiyacınız Olan Sistemler")
+
+        if st.button("Talebi Gönder"):
+            if ad_input and tel_input:
+                st.success(
+                    f"Teşekkürler {ad_input}, talebiniz sisteme kaydedilmiştir. En kısa sürede sizinle iletişime geçilecektir."
+                )
+            else:
+                st.warning(
+                    "Lütfen zorunlu alanları (Ad ve Telefon) doldurunuz."
+                )
