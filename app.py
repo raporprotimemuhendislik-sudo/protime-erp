@@ -368,7 +368,7 @@ st.sidebar.caption(
 
 
 # Ürünleri listeleme ve detay sayfası fonksiyonu
-def urunleri_grid_listele(filtre_kategori=None):
+def urunleri_grid_listele():
   # --- ÜRÜN DETAY SAYFASI (Tıklayınca Açılan Sayfa) ---
   if st.session_state.aktif_detay_urun is not None:
     urun = st.session_state.aktif_detay_urun
@@ -434,13 +434,6 @@ def urunleri_grid_listele(filtre_kategori=None):
 
   gorunen_urun_sayisi = 0
   for index, urun in enumerate(st.session_state.urunler_db):
-    if (
-        filtre_kategori
-        and filtre_kategori != "Tümü"
-        and urun["kategori"] != filtre_kategori
-    ):
-      continue
-
     fiyat_tl = urun["fiyat_usd"] * st.session_state.dolar_kur
     hedef_kolon = kolonlar[gorunen_urun_sayisi % 3]
     gorunen_urun_sayisi += 1
@@ -486,9 +479,6 @@ def urunleri_grid_listele(filtre_kategori=None):
           st.error("Stok Tükendi")
         st.markdown(f"</div>", unsafe_allow_html=True)
 
-  if gorunen_urun_sayisi == 0:
-    st.info("Bu kategoride henüz ürün bulunmuyor.")
-
 
 # ---------------------------------------------------------
 # SAYFALAR
@@ -505,7 +495,7 @@ if sayfa == "GES Katalog & Tüm Ürünler":
   )
 
   st.markdown("### 📦 Ürün ve Ekipman Kataloğu")
-  urunleri_grid_listele("Tümü")
+  urunleri_grid_listele()
 
 elif sayfa == "Teklif Sepetim":
   st.subheader("🛒 Teklif Sepetiniz ve Proje Özeti")
