@@ -111,7 +111,7 @@ if "urunler_db" not in st.session_state:
   ]
 
 # ---------------------------------------------------------
-# CSS TASARIM VE BUTON DÜZENLEMELERİ
+# CSS TASARIM VE KESİN BUTON OKUNABİLİRLİK AYARLARI
 # ---------------------------------------------------------
 st.markdown(
     """
@@ -127,17 +127,20 @@ st.markdown(
         color: #ffffff !important;
     }
     
-    .stButton>button {
+    /* Tüm Butonlar İçin Kesin Çözüm: Turuncu Arka Plan ve Beyaz Yazı */
+    div.stButton > button, div.stFormSubmitButton > button {
         background-color: #f39c12 !important;
         color: #ffffff !important;
         font-weight: bold !important;
-        border: none !important;
-        border-radius: 6px !important;
+        border: 2px solid #ffffff !important;
+        border-radius: 8px !important;
         padding: 0.5rem 1rem !important;
+        width: 100% !important;
     }
-    .stButton>button:hover {
+    div.stButton > button:hover, div.stFormSubmitButton > button:hover {
         background-color: #e67e22 !important;
         color: #ffffff !important;
+        border-color: #f39c12 !important;
     }
 
     .hero-container {
@@ -473,7 +476,6 @@ elif sayfa == "Yönetim Paneli":
       col_m1, col_m2, col_m3, col_m4 = st.columns([3, 2, 2, 1])
       with col_m1:
         st.write(f"**{urun['ad']}** ({urun['kategori']})")
-        # Yönetim panelinde ürünün mevcut görselini önizleme olarak gösterir
         st.image(urun["gorsel"], width=100)
       with col_m2:
         yeni_f = st.number_input(
