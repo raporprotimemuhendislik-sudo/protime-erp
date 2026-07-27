@@ -89,7 +89,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# ÜRÜN KATALOĞU (Görsel Destekli GES Bileşenleri)
+# ÜRÜN KATALOĞU (Solinved ve Gerçek GES Bileşen Görselleri)
 # ---------------------------------------------------------
 urunler_db = [
     {
@@ -99,7 +99,7 @@ urunler_db = [
         "fiyat_usd": 1450,
         "aciklama": "Yüksek verimli tam sinüs hibrit invertör çözümleri.",
         "gorsel": (
-            "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop"
+            "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=600&auto=format&fit=crop"
         ),
     },
     {
@@ -109,7 +109,7 @@ urunler_db = [
         "fiyat_usd": 1200,
         "aciklama": "Uzun ömürlü, güvenli ve modüler enerji depolama sistemleri.",
         "gorsel": (
-            "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=600&auto=format&fit=crop"
+            "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop"
         ),
     },
     {
@@ -188,7 +188,7 @@ st.sidebar.caption(
 )
 
 # ---------------------------------------------------------
-# SAYFA 1: GES KATALOG & ÜRÜNLER (Görsel Destekli)
+# SAYFA 1: GES KATALOG & ÜRÜNLER
 # ---------------------------------------------------------
 if sayfa == "GES Katalog & Ürünler":
   st.markdown(
@@ -240,7 +240,6 @@ if sayfa == "GES Katalog & Ürünler":
     with hedef_kolon:
       with st.container():
         st.markdown(f'<div class="product-box">', unsafe_allow_html=True)
-        # Streamlit yerel resim gösterici ile görseller artık sorunsuz yüklenecek
         st.image(urun["gorsel"], use_container_width=True)
         st.markdown(
             f"""
