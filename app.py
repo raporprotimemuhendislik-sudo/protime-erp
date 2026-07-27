@@ -157,18 +157,20 @@ if "urunler_db" not in st.session_state:
   ]
 
 # ---------------------------------------------------------
-# PROTIME MÜHENDİSLİK KURUMSAL CSS STİLLERİ
+# PROTIME MÜHENDİSLİK KURUMSAL CSS VE ARKA PLAN GÖRSELİ
 # ---------------------------------------------------------
 st.markdown(
     """
     <style>
+    /* Solinved Benzeri Geniş Açı Solar Panel Kurumsal Arka Plan */
     .stApp {
-        background-image: linear-gradient(rgba(10, 25, 47, 0.90), rgba(16, 42, 77, 0.90)), 
-                          url("https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=1920&auto=format&fit=crop");
+        background-image: linear-gradient(rgba(11, 19, 43, 0.88), rgba(18, 30, 60, 0.88)), 
+                          url("https://images.unsplash.com/photo-1497440001374-f26997328c1b?q=80&w=1920&auto=format&fit=crop");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }
+    
     h1, h2, h3, h4, h5, h6, p, span, label {
         color: #f8f9fa !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -193,17 +195,17 @@ st.markdown(
     }
 
     .hero-container {
-        background: linear-gradient(135deg, rgba(13, 37, 63, 0.85) 0%, rgba(26, 75, 132, 0.85) 100%);
+        background: linear-gradient(135deg, rgba(13, 37, 63, 0.88) 0%, rgba(26, 75, 132, 0.88) 100%);
         padding: 3rem 2rem;
         border-radius: 12px;
         color: white;
         text-align: center;
         margin-bottom: 2rem;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
     }
     .product-box {
-        background: rgba(18, 43, 75, 0.65);
+        background: rgba(18, 43, 75, 0.70);
         padding: 1.2rem;
         border-radius: 10px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.3);
