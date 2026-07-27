@@ -4,7 +4,7 @@ import streamlit as st
 
 # Sayfa Yapılandırması (Mobil ve Masaüstü Uyumlu)
 st.set_page_config(
-    page_title="Solinved - Akıllı Enerji Sistemleri & PROTIME ERP",
+    page_title="PROTIME Mühendislik - Akıllı Enerji Sistemleri & ERP",
     page_icon="☀️",
     layout="wide",
 )
@@ -49,7 +49,7 @@ if "urunler_db" not in st.session_state:
   st.session_state.urunler_db = [
       {
           "id": 1,
-          "ad": "Solinved Akıllı Hibrit Inverter 10kW",
+          "ad": "PROTIME Akıllı Hibrit Inverter 10kW",
           "kategori": "İnverterler",
           "fiyat_usd": 1450,
           "stok": 15,
@@ -63,7 +63,7 @@ if "urunler_db" not in st.session_state:
       },
       {
           "id": 2,
-          "ad": "Solinved Lityum İyon Akü Grubu 5kWh",
+          "ad": "PROTIME Lityum İyon Akü Grubu 5kWh",
           "kategori": "Akü Grupları",
           "fiyat_usd": 1200,
           "stok": 20,
@@ -128,7 +128,7 @@ if "urunler_db" not in st.session_state:
       },
       {
           "id": 7,
-          "ad": "Solinved 5kW Kurulu GES Paketi",
+          "ad": "PROTIME 5kW Kurulu GES Paketi",
           "kategori": "Kurulu GES Sistemleri",
           "fiyat_usd": 3800,
           "stok": 8,
@@ -142,7 +142,7 @@ if "urunler_db" not in st.session_state:
       },
       {
           "id": 8,
-          "ad": "Solinved 10kW Ticari Çatı Kurulu GES Paketi",
+          "ad": "PROTIME 10kW Ticari Çatı Kurulu GES Paketi",
           "kategori": "Kurulu GES Sistemleri",
           "fiyat_usd": 7500,
           "stok": 5,
@@ -157,7 +157,7 @@ if "urunler_db" not in st.session_state:
   ]
 
 # ---------------------------------------------------------
-# PROFESYONEL SOLINVED & PROTIME ERP CSS STİLLERİ
+# PROTIME MÜHENDİSLİK KURUMSAL CSS STİLLERİ
 # ---------------------------------------------------------
 st.markdown(
     """
@@ -229,9 +229,9 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# NAVİGASYON (SADELEŞTİRİLMİŞ MENÜ)
+# NAVİGASYON
 # ---------------------------------------------------------
-st.sidebar.title("☀️ SOLINVED / PROTIME")
+st.sidebar.title("☀️ PROTIME MÜHENDİSLİK")
 nav_secenekleri = [
     "GES Katalog & Tüm Ürünler",
     "Teklif Sepetim",
@@ -373,7 +373,7 @@ if sayfa == "GES Katalog & Tüm Ürünler":
   st.markdown(
       """
         <div class="hero-container">
-            <h1 style="font-size: 2.5rem; margin-bottom: 10px; color: #ffffff !important;">Solinved Akıllı Enerji Sistemleri</h1>
+            <h1 style="font-size: 2.5rem; margin-bottom: 10px; color: #ffffff !important;">PROTIME Mühendislik Akıllı Enerji Sistemleri</h1>
             <p style="font-size: 1.15rem; color: #cbd5e1 !important;">Yüksek verimli invertörler, paneller ve anahtar teslim kurulu paket sistemlerimiz.</p>
         </div>
     """,
@@ -461,8 +461,8 @@ elif sayfa == "Döviz Kuru Bilgisi":
   st.subheader("💱 Anlık Kur Entegrasyonu ve Fiyatlandırma Politikası")
   st.write(
       "Sistemimiz piyasa dalgalanmalarına karşı döviz kurunu canlı olarak"
-      " takip eder ve tüm Solinved GES bileşenlerinin maliyetlerini otomatik"
-      " günceller."
+      " takip eder ve tüm PROTIME Mühendislik GES bileşenlerinin"
+      " maliyetlerini otomatik günceller."
   )
   st.markdown(f"Geçerli Dolar Kuru: **{st.session_state.dolar_kur} TL**")
 
@@ -473,9 +473,10 @@ elif sayfa == "İletişim & Talep Formu":
     st.markdown(
         """
             **Şirket Bilgileri:**
+            * **Şirket:** PROTIME Mühendislik
             * **Yetkili:** Efe Ceylan
-            * **Faaliyet Alanı:** Güneş Enerjisi Sistemleri (GES)
-            * **E-posta:** bilgi@solinvedornegi.com
+            * **Faaliyet Alanı:** Güneş Enerjisi Sistemleri (GES) & Elektrik Mühendisliği
+            * **E-posta:** bilgi@protimemuhendislik.com
             * **Telefon:** +90 (312) 000 00 00
             * **Konum:** Ankara / Türkiye
         """
@@ -493,12 +494,13 @@ elif sayfa == "İletişim & Talep Formu":
             "detay": detay_input,
             "tarih": datetime.datetime.now().strftime("%d.%m.%Y %H:%M"),
         })
-        st.success("Talebiniz yönetim paneline iletildi!")
+        st.success("Talebiniz PROTIME yönetim paneline iletildi!")
       else:
         st.warning("Zorunlu alanları doldurun.")
 
 elif sayfa == "Yönetim Paneli":
-  st.subheader("🔐 PROTIME ERP - Yönetim Paneli Girişi")
+  st.subheader("🔐 PROTIME ERP - Gelişmiş Tam Erişim Yönetim Paneli")
+
   if not st.session_state.yonetici_giris:
     with st.form("giris_formu"):
       kullanici_adi = st.text_input("Kullanıcı Adı")
@@ -508,27 +510,71 @@ elif sayfa == "Yönetim Paneli":
           st.session_state.yonetici_giris = True
           st.rerun()
         else:
-          st.error("Hatalı giriş!")
+          st.error("Hatalı giriş! Kullanıcı adı veya şifre yanlış.")
   else:
-    st.success("✅ Yönetici oturumu açık.")
+    st.success(
+        "✅ Yönetici oturumu aktif. Tüm sistem kontrolü elinizdedir (Efe"
+        " Ceylan)."
+    )
     if st.button("Oturumu Kapat"):
       st.session_state.yonetici_giris = False
       st.rerun()
 
-    st.markdown("### 🔔 Müşteri Talepleri")
-    for idx, talep in enumerate(st.session_state.gelen_talepler):
-      st.write(
-          f"**{talep['ad']}** - {talep['telefon']} | Detay: {talep['detay']}"
-      )
-      if st.button(f"Sil {idx}", key=f"t_{idx}"):
-        st.session_state.gelen_talepler.pop(idx)
-        st.rerun()
+    st.markdown("---")
 
-    st.markdown("### 🛠️ Ürün ve Stok Ekle")
-    with st.expander("Yeni Ürün Ekle"):
-      y_ad = st.text_input("Ürün Adı")
+    # --- ÖZET İSTATİSTİKLER ---
+    col_stat1, col_stat2, col_stat3 = st.columns(3)
+    with col_stat1:
+      st.metric(
+          label="Toplam Ürün Çeşidi",
+          value=len(st.session_state.urunler_db),
+      )
+    with col_stat2:
+      st.metric(
+          label="Bekleyen Müşteri Talebi",
+          value=len(st.session_state.gelen_talepler),
+      )
+    with col_stat3:
+      st.metric(
+          label="Aktif Dolar Kuru (TL)", value=st.session_state.dolar_kur
+      )
+
+    st.markdown("---")
+
+    # --- MÜŞTERİ TALEPLERİ YÖNETİMİ ---
+    st.markdown("### 🔔 Müşteri Proje ve Talep Bildirimleri")
+    if not st.session_state.gelen_talepler:
+      st.info("Şu anda bekleyen yeni bir müşteri talep formu bulunmuyor.")
+    else:
+      st.warning(
+          f"Toplam {len(st.session_state.gelen_talepler)} adet yanıtlanmayı"
+          " bekleyen talep var."
+      )
+      for idx, talep in enumerate(st.session_state.gelen_talepler):
+        with st.container():
+          st.markdown(
+              f"""
+                    <div style="background: rgba(243, 156, 18, 0.15); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #f39c12;">
+                        <b>Müşteri / Firma:</b> {talep['ad']} <br>
+                        <b>İletişim Tel:</b> {talep['telefon']} <br>
+                        <b>Talep İçeriği:</b> {talep['detay']} <br>
+                        <span style="font-size: 0.8rem; color: #94a3b8;">Kayıt Tarihi: {talep['tarih']}</span>
+                    </div>
+                """,
+              unsafe_allow_html=True,
+          )
+          if st.button(f"Talebi Arşivle / Sil #{idx}", key=f"sil_talep_{idx}"):
+            st.session_state.gelen_talepler.pop(idx)
+            st.rerun()
+
+    st.markdown("---")
+
+    # --- YENİ ÜRÜN EKLEME ---
+    st.markdown("### ➕ Sisteme Yeni Ürün / Paket Ekle")
+    with st.expander("Ürün Ekleme Formunu Aç / Kapat"):
+      y_ad = st.text_input("Ürün veya Paket Adı")
       y_kat = st.selectbox(
-          "Kategori",
+          "Ürün Kategorisi",
           [
               "İnverterler",
               "Paneller",
@@ -538,19 +584,142 @@ elif sayfa == "Yönetim Paneli":
               "Bağlantı Ekipmanları",
           ],
       )
-      y_fiy = st.number_input("Fiyat ($)", value=100.0)
-      y_stk = st.number_input("Stok", value=10, step=1)
-      y_ack = st.text_area("Açıklama")
-      y_grs = st.text_input("Görsel URL")
-      if st.button("Kaydet"):
+      y_fiy = st.number_input("Birim Fiyat (USD)", min_value=0.0, value=250.0)
+      y_stk = st.number_input(
+          "Stok Miktarı", min_value=0, value=15, step=1
+      )
+      y_ack = st.text_area("Ürün Açıklaması / Teknik Detaylar")
+      y_grs = st.text_input(
+          "Görsel URL Bağlantısı",
+          value=(
+              "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
+          ),
+      )
+
+      if st.button("Ürünü Kataloğa Ekle"):
         if y_ad:
+          yeni_id = (
+              max([u["id"] for u in st.session_state.urunler_db]) + 1
+              if st.session_state.urunler_db
+              else 1
+          )
           st.session_state.urunler_db.append({
-              "id": len(st.session_state.urunler_db) + 1,
+              "id": yeni_id,
               "ad": y_ad,
               "kategori": y_kat,
               "fiyat_usd": y_fiy,
               "stok": y_stk,
               "aciklama": y_ack,
-              "gorsel": y_grs,
+              "gorsel": (
+                  y_grs
+                  if y_grs.startswith("http")
+                  else "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
+              ),
           })
-          st.success("Eklendi!")
+          st.success(f"'{y_ad}' başarıyla sisteme eklendi!")
+          st.rerun()
+        else:
+          st.warning("Lütfen ürün adını boş bırakmayın.")
+
+    st.markdown("---")
+
+    # --- MEVCUT ÜRÜNLERİ DÜZENLEME VE TAM YÖNETİMİ ---
+    st.markdown(
+        "### 🛠️ Mevcut Ürünlerin Tam Düzenlenmesi (Fiyat, Stok, Kategori ve"
+        " Görsel)"
+    )
+    st.write(
+        "Aşağıdaki alanlardan dilediğiniz ürünün adını, kategorisini, fiyatını,"
+        " stok miktarını, açıklamasını ve görsel linkini anlık olarak"
+        " güncelleyebilir veya ürünü tamamen silebilirsiniz."
+    )
+
+    for idx, urun in enumerate(st.session_state.urunler_db):
+      with st.container():
+        st.markdown(
+            f"""
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <b>Ürün ID:</b> {urun['id']}
+                </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        col_edit1, col_edit2 = st.columns([1, 2])
+
+        with col_edit1:
+          gorsel_guncel = (
+              urun["gorsel"]
+              if urun.get("gorsel") and urun["gorsel"].startswith("http")
+              else "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
+          )
+          st.image(gorsel_guncel, width=150)
+          yeni_gorsel_input = st.text_input(
+              f"Görsel URL ID:{urun['id']}",
+              value=urun["gorsel"],
+              key=f"gorsel_input_{urun['id']}",
+          )
+          st.session_state.urunler_db[idx]["gorsel"] = yeni_gorsel_input
+
+        with col_edit2:
+          yeni_ad_input = st.text_input(
+              f"Ürün Adı ID:{urun['id']}",
+              value=urun["ad"],
+              key=f"ad_input_{urun['id']}",
+          )
+          st.session_state.urunler_db[idx]["ad"] = yeni_ad_input
+
+          kategoriler_listesi = [
+              "İnverterler",
+              "Paneller",
+              "Kurulu GES Sistemleri",
+              "Akü Grupları",
+              "Sürücü Grupları",
+              "Bağlantı Ekipmanları",
+          ]
+          kat_index = (
+              kategoriler_listesi.index(urun["kategori"])
+              if urun["kategori"] in kategoriler_listesi
+              else 0
+          )
+          yeni_kat_input = st.selectbox(
+              f"Kategori ID:{urun['id']}",
+              kategoriler_listesi,
+              index=kat_index,
+              key=f"kat_input_{urun['id']}",
+          )
+          st.session_state.urunler_db[idx]["kategori"] = yeni_kat_input
+
+          col_f_s1, col_f_s2 = st.columns(2)
+          with col_f_s1:
+            yeni_fiyat_input = st.number_input(
+                f"Fiyat ($) ID:{urun['id']}",
+                value=float(urun["fiyat_usd"]),
+                key=f"fiyat_input_{urun['id']}",
+            )
+            st.session_state.urunler_db[idx]["fiyat_usd"] = yeni_fiyat_input
+          with col_f_s2:
+            yeni_stok_input = st.number_input(
+                f"Stok Adedi ID:{urun['id']}",
+                value=int(urun["stok"]),
+                step=1,
+                key=f"stok_input_{urun['id']}",
+            )
+            st.session_state.urunler_db[idx]["stok"] = yeni_stok_input
+
+          yeni_ack_input = st.text_area(
+              f"Açıklama ID:{urun['id']}",
+              value=urun["aciklama"],
+              key=f"ack_input_{urun['id']}",
+          )
+          st.session_state.urunler_db[idx]["aciklama"] = yeni_ack_input
+
+          if st.button(
+              f"🗑️ Bu Ürünü Sistemden Sil ID:{urun['id']}",
+              key=f"sil_urun_tam_{urun['id']}",
+          ):
+            st.session_state.urunler_db.pop(idx)
+            st.success("Ürün silindi!")
+            st.rerun()
+
+        st.markdown("---")
