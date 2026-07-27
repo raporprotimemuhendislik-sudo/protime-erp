@@ -42,6 +42,9 @@ if "gelen_talepler" not in st.session_state:
 if "aktif_detay_urun" not in st.session_state:
   st.session_state.aktif_detay_urun = None
 
+if "ana_sayfa_kategori" not in st.session_state:
+  st.session_state.ana_sayfa_kategori = "Tümü"
+
 if "urunler_db" not in st.session_state:
   st.session_state.urunler_db = [
       {
@@ -226,7 +229,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# NAVİGASYON (AYRI AYRI KATEGORİ SEÇENEKLERİ)
+# NAVİGASYON
 # ---------------------------------------------------------
 st.sidebar.title("☀️ SOLINVED / PROTIME")
 nav_secenekleri = [
@@ -254,10 +257,9 @@ st.sidebar.caption(
 )
 
 
-# Ürünleri listeleme yardımcı fonksiyonu
+# Ürünleri listeleme ve detay fonksiyonu
 def urunleri_grid_listele(filtre_kategori=None):
   if st.session_state.aktif_detay_urun is not None:
-    # --- ÖZEL ÜRÜN SAYFASI / DETAY EKRANI ---
     urun = st.session_state.aktif_detay_urun
     if st.button("⬅️ Katalog Geri Dön"):
       st.session_state.aktif_detay_urun = None
@@ -306,7 +308,6 @@ def urunleri_grid_listele(filtre_kategori=None):
         st.error("Üzgünüz, bu ürünün stoğu tükenmiştir.")
     return
 
-  # Normal Grid Listeleme
   col1, col2, col3 = st.columns(3)
   kolonlar = [col1, col2, col3]
 
@@ -345,7 +346,6 @@ def urunleri_grid_listele(filtre_kategori=None):
             unsafe_allow_html=True,
         )
 
-        # Ürün Detay Sayfasına Git Butonu
         if st.button(f"🔍 Ürünü İncele", key=f"incele_{urun['id']}"):
           st.session_state.aktif_detay_urun = urun
           st.rerun()
@@ -370,7 +370,7 @@ def urunleri_grid_listele(filtre_kategori=None):
 
 
 # ---------------------------------------------------------
-# SAYFALARIN YÖNETİMİ
+# SAYFALAR
 # ---------------------------------------------------------
 if sayfa == "GES Katalog & Tüm Ürünler":
   st.markdown(
@@ -382,8 +382,36 @@ if sayfa == "GES Katalog & Tüm Ürünler":
     """,
       unsafe_allow_html=True,
   )
-  st.markdown("### 📦 Tüm Ürün ve Ekipman Kataloğu")
-  urunleri_grid_listele(None)
+
+  # --- İŞARETLEDİĞİNİZ YERE EKLENEN HIZLI KATEGORİ BUTONLARI ---
+  st.markdown("### ⚡ Hızlı Kategori Seçimi")
+  k_col1, k_col2, k_col3 = st.columns(3)
+  with k_col1:
+    if st.button("⚡ İnverterler Kategorisi"):
+      st.session_state.ana_sayfa_kategori = "İnverterler"
+      st.rerun()
+  with k_col2:
+    if st.button("☀️ Paneller Kategorisi"):
+      st.session_state.ana_sayfa_kategori = "Paneller"
+      st.rerun()
+  with k_col3:
+    if st.button("📦 Kurulu GES Sistemleri"):
+      st.session_state.ana_sayfa_kategori = "Kurulu GES Sistemleri"
+      st.rerun()
+
+  if st.session_state.ana_sayfa_kategori != "Tümü":
+    if st.button(
+        f"🔙 Tüm Kataloğa Geri Dön (Aktif Filtre:"
+        f" {st.session_state.ana_sayfa_kategori})"
+    ):
+      st.session_state.ana_sayfa_kategori = "Tümü"
+      st.rerun()
+
+  st.markdown("---")
+  st.markdown(
+      f"### 📦 Ürün ve Ekipman Kataloğu ({st.session_state.ana_sayfa_kategori})"
+  )
+  urunleri_grid_listele(st.session_state.ana_sayfa_kategori)
 
 elif sayfa == "İnverterler":
   st.markdown(
