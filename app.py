@@ -119,7 +119,6 @@ if "urunler_db" not in st.session_state:
 st.markdown(
     """
     <style>
-    /* Solinved Kurumsal Arka Plan Tema */
     .stApp {
         background-image: linear-gradient(rgba(10, 25, 47, 0.90), rgba(16, 42, 77, 0.90)), 
                           url("https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=1920&auto=format&fit=crop");
@@ -127,14 +126,11 @@ st.markdown(
         background-position: center;
         background-attachment: fixed;
     }
-    
-    /* Genel Tipografi ve Metin Renkleri */
     h1, h2, h3, h4, h5, h6, p, span, label {
         color: #f8f9fa !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* Buton Tasarımları (Solinved Turuncu Kurumsal Vurgu) */
     div.stButton > button, div.stFormSubmitButton > button {
         background: linear-gradient(135deg, #f39c12 0%, #d35400 100%) !important;
         color: #ffffff !important;
@@ -153,7 +149,6 @@ st.markdown(
         transform: translateY(-2px);
     }
 
-    /* Kurumsal Manşet Alanı */
     .hero-container {
         background: linear-gradient(135deg, rgba(13, 37, 63, 0.85) 0%, rgba(26, 75, 132, 0.85) 100%);
         padding: 3rem 2rem;
@@ -164,8 +159,6 @@ st.markdown(
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
-    /* Ürün Kartı Tasarımı */
     .product-box {
         background: rgba(18, 43, 75, 0.65);
         padding: 1.2rem;
@@ -182,8 +175,6 @@ st.markdown(
     .product-box:hover {
         transform: translateY(-5px);
     }
-    
-    /* Sidebar Kurumsal Görünüm */
     [data-testid="stSidebar"] {
         background-color: rgba(10, 25, 47, 0.95);
         border-right: 1px solid rgba(255, 255, 255, 0.05);
@@ -195,7 +186,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# KURUMSAL SOLİNVED & PROTIME NAVİGASYON
+# NAVİGASYON
 # ---------------------------------------------------------
 st.sidebar.title("☀️ SOLINVED / PROTIME")
 nav_secenekleri = [
@@ -274,7 +265,15 @@ if sayfa == "GES Katalog & Ürünler":
     with hedef_kolon:
       with st.container():
         st.markdown(f'<div class="product-box">', unsafe_allow_html=True)
-        st.image(urun["gorsel"], use_container_width=True)
+        # Güvenli görsel yükleme (boşsa varsayılan solar görsel basar)
+        gorsel_link = (
+            urun["gorsel"]
+            if urun.get("gorsel")
+            and urun["gorsel"].startswith("http")
+            else "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
+        )
+        st.image(gorsel_link, use_container_width=True)
+
         st.markdown(
             f"""
                 <span style="background: rgba(243, 156, 18, 0.2); border: 1px solid #f39c12; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #f39c12; font-weight: bold;">{urun["kategori"]}</span>
@@ -384,7 +383,7 @@ elif sayfa == "Döviz Kuru Bilgisi":
     )
 
 # ---------------------------------------------------------
-# 4. İLETİŞİM & TALEP FORMU (Yönetim Paneline Bildirim Gönderir)
+# 4. İLETİŞİM & TALEP FORMU
 # ---------------------------------------------------------
 elif sayfa == "İletişim & Talep Formu":
   st.subheader("📍 İletişim ve Proje Başvurusu")
@@ -521,7 +520,11 @@ elif sayfa == "Yönetim Paneli":
               "fiyat_usd": yeni_fiyat,
               "stok": yeni_stok,
               "aciklama": yeni_aciklama,
-              "gorsel": yeni_gorsel,
+              "gorsel": (
+                  yeni_gorsel
+                  if yeni_gorsel.startswith("http")
+                  else "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
+              ),
           })
           st.success(f"'{yeni_ad}' başarıyla sisteme eklendi!")
         else:
@@ -532,7 +535,12 @@ elif sayfa == "Yönetim Paneli":
       col_m1, col_m2, col_m3, col_m4 = st.columns([3, 2, 2, 1])
       with col_m1:
         st.write(f"**{urun['ad']}** ({urun['kategori']})")
-        st.image(urun["gorsel"], width=100)
+        yonetim_gorsel = (
+            urun["gorsel"]
+            if urun.get("gorsel") and urun["gorsel"].startswith("http")
+            else "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
+        )
+        st.image(yonetim_gorsel, width=100)
       with col_m2:
         yeni_f = st.number_input(
             f"Fiyat ($) ID:{urun['id']}",
