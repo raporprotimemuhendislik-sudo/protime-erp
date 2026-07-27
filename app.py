@@ -4,7 +4,7 @@ import streamlit as st
 
 # Sayfa Yapılandırması (Mobil ve Masaüstü Uyumlu)
 st.set_page_config(
-    page_title="PROTIME ERP & Solinved - Akıllı Enerji Sistemleri",
+    page_title="Solinved - Akıllı Enerji Sistemleri & PROTIME ERP",
     page_icon="☀️",
     layout="wide",
 )
@@ -43,13 +43,13 @@ if "urunler_db" not in st.session_state:
   st.session_state.urunler_db = [
       {
           "id": 1,
-          "ad": "Solinved Akıllı Hibrit İnverter 10kW",
+          "ad": "Solinved Akıllı Hibrit Inverter 10kW",
           "kategori": "İnverterler",
           "fiyat_usd": 1450,
           "stok": 15,
           "aciklama": "Yüksek verimli tam sinüs hibrit inverter çözümleri.",
           "gorsel": (
-              "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=800&auto=format&fit=crop"
           ),
       },
       {
@@ -62,7 +62,7 @@ if "urunler_db" not in st.session_state:
               "Uzun ömürlü, güvenli ve modüler enerji depolama sistemleri."
           ),
           "gorsel": (
-              "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=800&auto=format&fit=crop"
           ),
       },
       {
@@ -73,7 +73,7 @@ if "urunler_db" not in st.session_state:
           "stok": 50,
           "aciklama": "TUV sertifikalı, güneşe dayanıklı fotovoltaik kablo.",
           "gorsel": (
-              "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=800&auto=format&fit=crop"
           ),
       },
       {
@@ -86,7 +86,7 @@ if "urunler_db" not in st.session_state:
               "Tarımsal sulama ve endüstriyel su pompaları için özel sürücü."
           ),
           "gorsel": (
-              "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800&auto=format&fit=crop"
           ),
       },
       {
@@ -97,7 +97,7 @@ if "urunler_db" not in st.session_state:
           "stok": 100,
           "aciklama": "Yüksek verimli PERC teknoloji güneş paneli.",
           "gorsel": (
-              "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
           ),
       },
       {
@@ -108,71 +108,85 @@ if "urunler_db" not in st.session_state:
           "stok": 30,
           "aciklama": "Sigortalı ve surge arrestörlü komple koruma panosu.",
           "gorsel": (
-              "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop"
           ),
       },
   ]
 
 # ---------------------------------------------------------
-# CSS TASARIM VE KESİN BUTON GÖRÜNÜRLÜK AYARLARI
+# PROFESYONEL SOLINVED & PROTIME ERP CSS STİLLERİ
 # ---------------------------------------------------------
 st.markdown(
     """
     <style>
+    /* Solinved Kurumsal Arka Plan Tema */
     .stApp {
-        background-image: linear-gradient(rgba(15, 32, 39, 0.85), rgba(44, 83, 100, 0.85)), 
+        background-image: linear-gradient(rgba(10, 25, 47, 0.90), rgba(16, 42, 77, 0.90)), 
                           url("https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=1920&auto=format&fit=crop");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }
+    
+    /* Genel Tipografi ve Metin Renkleri */
     h1, h2, h3, h4, h5, h6, p, span, label {
-        color: #ffffff !important;
+        color: #f8f9fa !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* Streamlit Butonlarının Okunmama Sorununa Kesin Çözüm */
+    /* Buton Tasarımları (Solinved Turuncu Kurumsal Vurgu) */
     div.stButton > button, div.stFormSubmitButton > button {
-        background-color: #f39c12 !important;
+        background: linear-gradient(135deg, #f39c12 0%, #d35400 100%) !important;
         color: #ffffff !important;
-        font-size: 16px !important;
-        font-weight: bold !important;
-        border: 2px solid #ffffff !important;
-        border-radius: 8px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        border: none !important;
+        border-radius: 6px !important;
         padding: 0.6rem 1.2rem !important;
         width: 100% !important;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 10px rgba(243, 156, 18, 0.3);
+        transition: all 0.3s ease;
     }
     div.stButton > button:hover, div.stFormSubmitButton > button:hover {
-        background-color: #e67e22 !important;
-        color: #ffffff !important;
-        border-color: #f39c12 !important;
+        background: linear-gradient(135deg, #e67e22 0%, #b94000 100%) !important;
+        box-shadow: 0 6px 15px rgba(243, 156, 18, 0.5);
+        transform: translateY(-2px);
     }
 
+    /* Kurumsal Manşet Alanı */
     .hero-container {
-        background: rgba(15, 32, 39, 0.75);
-        padding: 3rem 1.5rem;
+        background: linear-gradient(135deg, rgba(13, 37, 63, 0.85) 0%, rgba(26, 75, 132, 0.85) 100%);
+        padding: 3rem 2rem;
         border-radius: 12px;
         color: white;
         text-align: center;
         margin-bottom: 2rem;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        backdrop-filter: blur(4px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
+    
+    /* Ürün Kartı Tasarımı */
     .product-box {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 1rem;
+        background: rgba(18, 43, 75, 0.65);
+        padding: 1.2rem;
         border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         margin-bottom: 1.5rem;
         border-top: 4px solid #f39c12;
-        backdrop-filter: blur(8px);
         border-left: 1px solid rgba(255, 255, 255, 0.1);
         border-right: 1px solid rgba(255, 255, 255, 0.1);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease;
     }
+    .product-box:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* Sidebar Kurumsal Görünüm */
     [data-testid="stSidebar"] {
-        background-color: rgba(15, 32, 39, 0.95);
+        background-color: rgba(10, 25, 47, 0.95);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
     }
     </style>
@@ -181,9 +195,9 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# NAVİGASYON
+# KURUMSAL SOLİNVED & PROTIME NAVİGASYON
 # ---------------------------------------------------------
-st.sidebar.title("☀️ PROTIME ERP")
+st.sidebar.title("☀️ SOLINVED / PROTIME")
 nav_secenekleri = [
     "GES Katalog & Ürünler",
     "Teklif Sepetim",
@@ -191,10 +205,10 @@ nav_secenekleri = [
     "İletişim & Talep Formu",
     "Yönetim Paneli",
 ]
-sayfa = st.sidebar.radio("Navigasyon", nav_secenekleri)
+sayfa = st.sidebar.radio("Navigasyon Menüsü", nav_secenekleri)
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("💱 Güncel Kur Bilgisi")
+st.sidebar.subheader("💱 Anlık Kur Takibi")
 
 if st.sidebar.button("🔄 Kuru Yenile"):
   st.session_state.dolar_kur = canli_kur_cek()
@@ -206,14 +220,14 @@ st.sidebar.caption(
 )
 
 # ---------------------------------------------------------
-# 1. GES KATALOG & ÜRÜNLER (Müşteri Ekranı)
+# 1. GES KATALOG & ÜRÜNLER (Müşteri Arayüzü)
 # ---------------------------------------------------------
 if sayfa == "GES Katalog & Ürünler":
   st.markdown(
       """
         <div class="hero-container">
-            <h1 style="font-size: 2.3rem; margin-bottom: 10px; color: #ffffff !important;">Solinved & PROTIME ERP Müşteri Kataloğu</h1>
-            <p style="font-size: 1.1rem; color: #e0e0e0 !important;">Projeleriniz için yüksek verimli güneş enerjisi sistemleri ve anlık kur entegreli fiyatlar.</p>
+            <h1 style="font-size: 2.5rem; margin-bottom: 10px; color: #ffffff !important;">Solinved Akıllı Enerji Sistemleri</h1>
+            <p style="font-size: 1.15rem; color: #cbd5e1 !important;">Yüksek verimli invertörler, endüstriyel akü grupları ve profesyonel güneş enerjisi bileşenleri.</p>
         </div>
     """,
       unsafe_allow_html=True,
@@ -222,7 +236,7 @@ if sayfa == "GES Katalog & Ürünler":
   col_f1, col_f2 = st.columns([2, 2])
   with col_f1:
     kategori_secim = st.selectbox(
-        "Kategori Seçin",
+        "Kategori Filtrele",
         [
             "Tümü",
             "İnverterler",
@@ -233,9 +247,11 @@ if sayfa == "GES Katalog & Ürünler":
         ],
     )
   with col_f2:
-    arama_metni = st.text_input("🔍 Ürün Ara", placeholder="Arama yapın...")
+    arama_metni = st.text_input(
+        "🔍 Ürün Ara", placeholder="Katalogda ürün arayın..."
+    )
 
-  st.markdown("### 📦 Ürün Listesi")
+  st.markdown("### 📦 Ürün ve Ekipman Kataloğu")
 
   col1, col2, col3 = st.columns(3)
   kolonlar = [col1, col2, col3]
@@ -261,12 +277,12 @@ if sayfa == "GES Katalog & Ürünler":
         st.image(urun["gorsel"], use_container_width=True)
         st.markdown(
             f"""
-                <span style="background: rgba(44, 83, 100, 0.9); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #fff; font-weight: bold;">{urun["kategori"]}</span>
-                <h3 style="color: #ffffff; font-size: 1.05rem; margin-top: 8px; min-height: 45px;">{urun["ad"]}</h3>
-                <p style="color: #dddddd; font-size: 0.8rem; min-height: 35px;">{urun["aciklama"]}</p>
-                <p style="color: #a0e0ff; font-size: 0.85rem; margin: 0;">Stok: <b>{urun["stok"]} Adet</b></p>
-                <h4 style="color: #f39c12; margin: 3px 0;">${urun["fiyat_usd"]:,} <span style="font-size: 0.75rem; color: #bbb;">(USD)</span></h4>
-                <p style="color: #2ecc71; font-size: 0.95rem; font-weight: bold;">₺{fiyat_tl:,.2f} <span style="font-size: 0.7rem; color: #bbb;">(KDV Hariç)</span></p>
+                <span style="background: rgba(243, 156, 18, 0.2); border: 1px solid #f39c12; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #f39c12; font-weight: bold;">{urun["kategori"]}</span>
+                <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 10px; min-height: 45px;">{urun["ad"]}</h3>
+                <p style="color: #cbd5e1; font-size: 0.85rem; min-height: 40px;">{urun["aciklama"]}</p>
+                <p style="color: #38bdf8; font-size: 0.85rem; margin: 0 0 5px 0;">Stok Durumu: <b>{urun["stok"]} Adet</b></p>
+                <h4 style="color: #f39c12; margin: 5px 0;">${urun["fiyat_usd"]:,} <span style="font-size: 0.75rem; color: #94a3b8;">(USD)</span></h4>
+                <p style="color: #4ade80; font-size: 1rem; font-weight: bold; margin-bottom: 10px;">₺{fiyat_tl:,.2f} <span style="font-size: 0.7rem; color: #94a3b8;">(KDV Hariç)</span></p>
             """,
             unsafe_allow_html=True,
         )
@@ -282,7 +298,7 @@ if sayfa == "GES Katalog & Ürünler":
             )
             st.success(f"'{urun['ad']}' sepete eklendi!")
         else:
-          st.warning("Stok Tükendi")
+          st.error("Stok Tükendi")
         st.markdown(f"</div>", unsafe_allow_html=True)
 
   if gorunen_urun_sayisi == 0:
@@ -292,7 +308,7 @@ if sayfa == "GES Katalog & Ürünler":
 # 2. TEKLİF SEPETİM
 # ---------------------------------------------------------
 elif sayfa == "Teklif Sepetim":
-  st.subheader("🛒 Teklif Sepetiniz")
+  st.subheader("🛒 Teklif Sepetiniz ve Proje Özeti")
 
   if not st.session_state.sepet:
     st.info(
@@ -351,8 +367,8 @@ elif sayfa == "Teklif Sepetim":
 elif sayfa == "Döviz Kuru Bilgisi":
   st.subheader("💱 Anlık Kur Entegrasyonu ve Fiyatlandırma Politikası")
   st.write(
-      "Sistemimiz, piyasa koşullarına bağlı olarak döviz kurunu otomatik"
-      " olarak takip eder ve tüm GES bileşenlerinin TL karşılıklarını anlık"
+      "Sistemimiz piyasa dalgalanmalarına karşı döviz kurunu canlı olarak"
+      " takip eder ve tüm Solinved GES bileşenlerinin maliyetlerini otomatik"
       " günceller."
   )
 
@@ -395,7 +411,6 @@ elif sayfa == "İletişim & Talep Formu":
 
     if st.button("Talebi Gönder"):
       if ad_input and tel_input:
-        # Yönetim paneline bildirim olarak kaydetme
         zaman_str = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
         st.session_state.gelen_talepler.append({
             "ad": ad_input,
@@ -404,14 +419,14 @@ elif sayfa == "İletişim & Talep Formu":
             "tarih": zaman_str,
         })
         st.success(
-            f"Teşekkürler {ad_input}, talebiniz sisteme ve yönetim paneline"
-            " başarıyla iletildi!"
+            f"Teşekkürler {ad_input}, talebiniz Solinved yönetim paneline başarıyla"
+            " iletildi!"
         )
       else:
         st.warning("Lütfen zorunlu alanları (Ad ve Telefon) doldurunuz.")
 
 # ---------------------------------------------------------
-# 5. YÖNETİM PANELİ (Bildirimler ve Stok Kontrolü)
+# 5. YÖNETİM PANELİ (Giriş Korumalı & Bildirimler)
 # ---------------------------------------------------------
 elif sayfa == "Yönetim Paneli":
   st.subheader("🔐 PROTIME ERP - Yönetim Paneli Girişi")
@@ -442,23 +457,21 @@ elif sayfa == "Yönetim Paneli":
     # --- MÜŞTERİ TALEP BİLDİRİMLERİ ---
     st.markdown("### 🔔 Müşteri Proje ve Talep Bildirimleri")
     if not st.session_state.gelen_talepler:
-      st.info(
-          "Henüz gelen yeni bir proje talep formu bulunmuyor."
-      )
+      st.info("Henüz gelen yeni bir proje talep formu bulunmuyor.")
     else:
       st.warning(
-          f"Toplam {len(st.session_state.gelen_talepler)} adet yeni talep"
-          " bulunmaktadır."
+          f"Toplam {len(st.session_state.gelen_talepler)} adet yeni müşteri"
+          " talebi bulunmaktadır."
       )
       for idx, talep in enumerate(st.session_state.gelen_talepler):
         with st.container():
           st.markdown(
               f"""
-                    <div style="background: rgba(243, 156, 18, 0.15); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #f39c12;">
+                    <div style="background: rgba(243, 156, 18, 0.15); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #f39c12;">
                         <b>Gönderen / Firma:</b> {talep['ad']} <br>
                         <b>Telefon:</b> {talep['telefon']} <br>
                         <b>Talep Detayı:</b> {talep['detay']} <br>
-                        <span style="font-size: 0.8rem; color: #bbb;">Tarih: {talep['tarih']}</span>
+                        <span style="font-size: 0.8rem; color: #94a3b8;">Tarih: {talep['tarih']}</span>
                     </div>
                 """,
               unsafe_allow_html=True,
@@ -490,7 +503,7 @@ elif sayfa == "Yönetim Paneli":
       yeni_gorsel = st.text_input(
           "Görsel URL (Ürün Resim Bağlantısı)",
           value=(
-              "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=600&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=800&auto=format&fit=crop"
           ),
       )
 
