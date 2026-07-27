@@ -229,14 +229,11 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# NAVİGASYON
+# NAVİGASYON (SADELEŞTİRİLMİŞ MENÜ)
 # ---------------------------------------------------------
 st.sidebar.title("☀️ SOLINVED / PROTIME")
 nav_secenekleri = [
     "GES Katalog & Tüm Ürünler",
-    "İnverterler",
-    "Paneller",
-    "Kurulu GES Sistemleri",
     "Teklif Sepetim",
     "Döviz Kuru Bilgisi",
     "İletişim & Talep Formu",
@@ -383,7 +380,7 @@ if sayfa == "GES Katalog & Tüm Ürünler":
       unsafe_allow_html=True,
   )
 
-  # --- İŞARETLEDİĞİNİZ YERE EKLENEN HIZLI KATEGORİ BUTONLARI ---
+  # Hızlı Kategori Seçimi Butonları
   st.markdown("### ⚡ Hızlı Kategori Seçimi")
   k_col1, k_col2, k_col3 = st.columns(3)
   with k_col1:
@@ -412,45 +409,6 @@ if sayfa == "GES Katalog & Tüm Ürünler":
       f"### 📦 Ürün ve Ekipman Kataloğu ({st.session_state.ana_sayfa_kategori})"
   )
   urunleri_grid_listele(st.session_state.ana_sayfa_kategori)
-
-elif sayfa == "İnverterler":
-  st.markdown(
-      """
-        <div class="hero-container">
-            <h1 style="font-size: 2.3rem; margin-bottom: 10px; color: #ffffff !important;">Solinved İnverter Çözümleri</h1>
-            <p style="font-size: 1.1rem; color: #cbd5e1 !important;">Yüksek verimli hibrit ve şebeke bağlantılı akıllı inverter modellerimiz.</p>
-        </div>
-    """,
-      unsafe_allow_html=True,
-  )
-  st.markdown("### ⚡ İnverter Modelleri")
-  urunleri_grid_listele("İnverterler")
-
-elif sayfa == "Paneller":
-  st.markdown(
-      """
-        <div class="hero-container">
-            <h1 style="font-size: 2.3rem; margin-bottom: 10px; color: #ffffff !important;">Solinved Solar Paneller</h1>
-            <p style="font-size: 1.1rem; color: #cbd5e1 !important;">Yüksek PERC verimliliğine sahip monokristal güneş paneli serimiz.</p>
-        </div>
-    """,
-      unsafe_allow_html=True,
-  )
-  st.markdown("### ☀️ Solar Paneller")
-  urunleri_grid_listele("Paneller")
-
-elif sayfa == "Kurulu GES Sistemleri":
-  st.markdown(
-      """
-        <div class="hero-container">
-            <h1 style="font-size: 2.3rem; margin-bottom: 10px; color: #ffffff !important;">Anahtar Teslim Kurulu GES Paketleri</h1>
-            <p style="font-size: 1.1rem; color: #cbd5e1 !important;">Villa, tarla ve endüstriyel tesisler için komple kurulu enerji paketleri.</p>
-        </div>
-    """,
-      unsafe_allow_html=True,
-  )
-  st.markdown("### ⚡ Kurulu Paket Sistemlerimiz")
-  urunleri_grid_listele("Kurulu GES Sistemleri")
 
 elif sayfa == "Teklif Sepetim":
   st.subheader("🛒 Teklif Sepetiniz ve Proje Özeti")
