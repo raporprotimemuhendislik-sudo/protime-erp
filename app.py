@@ -2,7 +2,7 @@ import datetime
 import requests
 import streamlit as st
 
-# Sayfa Yapılandırması (Mobil ve Masaüstü Uyumlu Müşteri Ekranı)
+# Sayfa Yapılandırması (Mobil ve Masaüstü Uyumlu)
 st.set_page_config(
     page_title="PROTIME ERP & Solinved - Akıllı Enerji Sistemleri",
     page_icon="☀️",
@@ -33,13 +33,89 @@ if "sepet" not in st.session_state:
 if "dolar_kur" not in st.session_state:
   st.session_state.dolar_kur = canli_kur_cek()
 
+if "yonetici_giris" not in st.session_state:
+  st.session_state.yonetici_giris = False
+
+if "urunler_db" not in st.session_state:
+  st.session_state.urunler_db = [
+      {
+          "id": 1,
+          "ad": "Solinved Akıllı Hibrit İnverter 10kW",
+          "kategori": "İnverterler",
+          "fiyat_usd": 1450,
+          "stok": 15,
+          "aciklama": "Yüksek verimli tam sinüs hibrit inverter çözümleri.",
+          "gorsel": (
+              "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=600&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 2,
+          "ad": "Solinved Lityum İyon Akü Grubu 5kWh",
+          "kategori": "Akü Grupları",
+          "fiyat_usd": 1200,
+          "stok": 20,
+          "aciklama": (
+              "Uzun ömürlü, güvenli ve modüler enerji depolama sistemleri."
+          ),
+          "gorsel": (
+              "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 3,
+          "ad": "Solar DC Kablo 6mm (100m Top)",
+          "kategori": "Bağlantı Ekipmanları",
+          "fiyat_usd": 110,
+          "stok": 50,
+          "aciklama": "TUV sertifikalı, güneşe dayanıklı fotovoltaik kablo.",
+          "gorsel": (
+              "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=600&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 4,
+          "ad": "Solar Pompa Sürücüsü 7.5kW",
+          "kategori": "Sürücü Grupları",
+          "fiyat_usd": 450,
+          "stok": 10,
+          "aciklama": (
+              "Tarımsal sulama ve endüstriyel su pompaları için özel sürücü."
+          ),
+          "gorsel": (
+              "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=600&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 5,
+          "ad": "Monokristal Solar Panel 550W",
+          "kategori": "Paneller",
+          "fiyat_usd": 135,
+          "stok": 100,
+          "aciklama": "Yüksek verimli PERC teknoloji güneş paneli.",
+          "gorsel": (
+              "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=600&auto=format&fit=crop"
+          ),
+      },
+      {
+          "id": 6,
+          "ad": "AC/DC Koruma Kutusu (Kombinör)",
+          "kategori": "Bağlantı Ekipmanları",
+          "fiyat_usd": 220,
+          "stok": 30,
+          "aciklama": "Sigortalı ve surge arrestörlü komple koruma panosu.",
+          "gorsel": (
+              "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600&auto=format&fit=crop"
+          ),
+      },
+  ]
+
 # ---------------------------------------------------------
-# CSS TASARIM VE GÜNEŞ PANELLİ ARKA PLAN (Solinved & PROTIME)
+# CSS TASARIM VE GÜNEŞ PANELLİ ARKA PLAN
 # ---------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Genel Sayfa Arka Planı ve Güneş Paneli Görseli */
     .stApp {
         background-image: linear-gradient(rgba(15, 32, 39, 0.85), rgba(44, 83, 100, 0.85)), 
                           url("https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=1920&auto=format&fit=crop");
@@ -47,12 +123,9 @@ st.markdown(
         background-position: center;
         background-attachment: fixed;
     }
-    
-    /* Metin Renklerinin Okunabilirliği İçin Düzenlemeler */
     h1, h2, h3, h4, h5, h6, p, span, label {
         color: #ffffff !important;
     }
-
     .hero-container {
         background: rgba(15, 32, 39, 0.75);
         padding: 3rem 1.5rem;
@@ -64,7 +137,6 @@ st.markdown(
         backdrop-filter: blur(4px);
         border: 1px solid rgba(255, 255, 255, 0.18);
     }
-    
     .product-box {
         background: rgba(255, 255, 255, 0.1);
         padding: 1rem;
@@ -77,8 +149,6 @@ st.markdown(
         border-right: 1px solid rgba(255, 255, 255, 0.1);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
-    /* Sidebar Tasarımı */
     [data-testid="stSidebar"] {
         background-color: rgba(15, 32, 39, 0.95);
         backdrop-filter: blur(10px);
@@ -89,84 +159,17 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# MÜŞTERİ KATALOĞU (Ürünler ve Görseller)
+# NAVİGASYON (YÖNETİM PANELİ EN ÜSTTE)
 # ---------------------------------------------------------
-urunler_db = [
-    {
-        "id": 1,
-        "ad": "Solinved Akıllı Hibrit İnverter 10kW",
-        "kategori": "İnverterler",
-        "fiyat_usd": 1450,
-        "aciklama": "Yüksek verimli tam sinüs hibrit inverter çözümleri.",
-        "gorsel": (
-            "https://images.unsplash.com/photo-1592838042647-f5c9e2a6d859?q=80&w=600&auto=format&fit=crop"
-        ),
-    },
-    {
-        "id": 2,
-        "ad": "Solinved Lityum İyon Akü Grubu 5kWh",
-        "kategori": "Akü Grupları",
-        "fiyat_usd": 1200,
-        "aciklama": "Uzun ömürlü, güvenli ve modüler enerji depolama sistemleri.",
-        "gorsel": (
-            "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=600&auto=format&fit=crop"
-        ),
-    },
-    {
-        "id": 3,
-        "ad": "Solar DC Kablo 6mm (100m Top)",
-        "kategori": "Bağlantı Ekipmanları",
-        "fiyat_usd": 110,
-        "aciklama": "TUV sertifikalı, güneşe dayanıklı fotovoltaik kablo.",
-        "gorsel": (
-            "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=600&auto=format&fit=crop"
-        ),
-    },
-    {
-        "id": 4,
-        "ad": "Solar Pompa Sürücüsü 7.5kW",
-        "kategori": "Sürücü Grupları",
-        "fiyat_usd": 450,
-        "aciklama": "Tarımsal sulama ve endüstriyel su pompaları için özel sürücü.",
-        "gorsel": (
-            "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=600&auto=format&fit=crop"
-        ),
-    },
-    {
-        "id": 5,
-        "ad": "Monokristal Solar Panel 550W",
-        "kategori": "Paneller",
-        "fiyat_usd": 135,
-        "aciklama": "Yüksek verimli PERC teknoloji güneş paneli.",
-        "gorsel": (
-            "https://images.unsplash.com/photo-1508873696983-2df5c92064c7?q=80&w=600&auto=format&fit=crop"
-        ),
-    },
-    {
-        "id": 6,
-        "ad": "AC/DC Koruma Kutusu (Kombinör)",
-        "kategori": "Bağlantı Ekipmanları",
-        "fiyat_usd": 220,
-        "aciklama": "Sigortalı ve surge arrestörlü komple koruma panosu.",
-        "gorsel": (
-            "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600&auto=format&fit=crop"
-        ),
-    },
+st.sidebar.title("☀️ PROTIME ERP")
+nav_secenekleri = [
+    "Yönetim Paneli",
+    "GES Katalog & Ürünler",
+    "Teklif Sepetim",
+    "Döviz Kuru Bilgisi",
+    "İletişim & Talep Formu",
 ]
-
-# ---------------------------------------------------------
-# MÜŞTERİ MENÜSÜ (Sidebar)
-# ---------------------------------------------------------
-st.sidebar.title("☀️ Müşteri Portal")
-sayfa = st.sidebar.radio(
-    "Menü",
-    [
-        "GES Katalog & Ürünler",
-        "Teklif Sepetim",
-        "Döviz Kuru Bilgisi",
-        "İletişim & Talep Formu",
-    ],
-)
+sayfa = st.sidebar.radio("Navigasyon", nav_secenekleri)
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("💱 Güncel Kur Bilgisi")
@@ -181,9 +184,110 @@ st.sidebar.caption(
 )
 
 # ---------------------------------------------------------
-# SAYFA 1: GES KATALOG & ÜRÜNLER
+# 1. YÖNETİM PANELİ (Giriş Korumalı & Tam Kontrol)
 # ---------------------------------------------------------
-if sayfa == "GES Katalog & Ürünler":
+if sayfa == "Yönetim Paneli":
+  st.subheader("🔐 PROTIME ERP - Yönetim Paneli Girişi")
+
+  if not st.session_state.yonetici_giris:
+    with st.form("giris_formu"):
+      kullanici_adi = st.text_input("Kullanıcı Adı")
+      sifre = st.text_input("Şifre", type="password")
+      giris_buton = st.form_submit_button("Giriş Yap")
+
+      if giris_buton:
+        if kullanici_adi == "protime" and sifre == "protime5151":
+          st.session_state.yonetici_giris = True
+          st.success("Giriş başarılı! Yönetim paneli açılıyor...")
+          st.rerun()
+        else:
+          st.error(
+              "Hatalı giriş yaptınız! Kullanıcı adı veya şifre yanlış."
+          )
+  else:
+    st.success("✅ Yönetici oturumu açık.")
+    if st.button("Oturumu Kapat"):
+      st.session_state.yonetici_giris = False
+      st.rerun()
+
+    st.markdown("---")
+    st.markdown("### 🛠️ Ürün ve Stok Kontrol Paneli")
+
+    # Yeni Ürün Ekleme / Stok Güncelleme Bölümü
+    with st.expander("➕ Yeni Ürün Ekle / Stok Güncelle"):
+      yeni_ad = st.text_input("Ürün Adı")
+      yeni_kategori = st.selectbox(
+          "Kategori",
+          [
+              "İnverterler",
+              "Akü Grupları",
+              "Bağlantı Ekipmanları",
+              "Sürücü Grupları",
+              "Paneller",
+          ],
+      )
+      yeni_fiyat = st.number_input("Birim Fiyat (USD)", min_value=0.0, value=100.0)
+      yeni_stok = st.number_input(
+          "Stok Miktarı", min_value=0, value=10, step=1
+      )
+      yeni_aciklama = st.text_area("Ürün Açıklaması")
+      yeni_gorsel = st.text_input(
+          "Görsel URL (İsteğe bağlı, boş bırakılabilir)",
+          value=(
+              "https://images.unsplash.com/photo-1509391365330-184511d7fc49?q=80&w=600&auto=format&fit=crop"
+          ),
+      )
+
+      if st.button("Ürünü Sisteme Kaydet / Ekle"):
+        if yeni_ad:
+          yeni_id = (
+              max([u["id"] for u in st.session_state.urunler_db]) + 1
+              if st.session_state.urunler_db
+              else 1
+          )
+          st.session_state.urunler_db.append({
+              "id": yeni_id,
+              "ad": yeni_ad,
+              "kategori": yeni_kategori,
+              "fiyat_usd": yeni_fiyat,
+              "stok": yeni_stok,
+              "aciklama": yeni_aciklama,
+              "gorsel": yeni_gorsel,
+          })
+          st.success(f"'{yeni_ad}' başarıyla sisteme eklendi!")
+        else:
+          st.warning("Lütfen ürün adını giriniz.")
+
+    st.markdown("### 📋 Mevcut Ürünler ve Stok Listesi")
+    for idx, urun in enumerate(st.session_state.urunler_db):
+      col_m1, col_m2, col_m3, col_m4 = st.columns([3, 2, 2, 1])
+      with col_m1:
+        st.write(f"**{urun['ad']}** ({urun['kategori']})")
+      with col_m2:
+        yeni_f = st.number_input(
+            f"Fiyat ($) ID:{urun['id']}",
+            value=float(urun["fiyat_usd"]),
+            key=f"fiyat_{urun['id']}",
+        )
+        st.session_state.urunler_db[idx]["fiyat_usd"] = yeni_f
+      with col_m3:
+        yeni_s = st.number_input(
+            f"Stok ID:{urun['id']}",
+            value=int(urun["stok"]),
+            key=f"stok_{urun['id']}",
+            step=1,
+        )
+        st.session_state.urunler_db[idx]["stok"] = yeni_s
+      with col_m4:
+        if st.button("🗑️ Sil", key=f"sil_urun_{urun['id']}"):
+          st.session_state.urunler_db.pop(idx)
+          st.rerun()
+      st.markdown("---")
+
+# ---------------------------------------------------------
+# 2. GES KATALOG & ÜRÜNLER (Müşteri Ekranı)
+# ---------------------------------------------------------
+elif sayfa == "GES Katalog & Ürünler":
   st.markdown(
       """
         <div class="hero-container">
@@ -216,7 +320,7 @@ if sayfa == "GES Katalog & Ürünler":
   kolonlar = [col1, col2, col3]
 
   gorunen_urun_sayisi = 0
-  for index, urun in enumerate(urunler_db):
+  for index, urun in enumerate(st.session_state.urunler_db):
     if kategori_secim != "Tümü" and urun["kategori"] != kategori_secim:
       continue
     if (
@@ -239,28 +343,32 @@ if sayfa == "GES Katalog & Ürünler":
                 <span style="background: rgba(44, 83, 100, 0.9); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; color: #fff; font-weight: bold;">{urun["kategori"]}</span>
                 <h3 style="color: #ffffff; font-size: 1.05rem; margin-top: 8px; min-height: 45px;">{urun["ad"]}</h3>
                 <p style="color: #dddddd; font-size: 0.8rem; min-height: 35px;">{urun["aciklama"]}</p>
+                <p style="color: #a0e0ff; font-size: 0.85rem; margin: 0;">Stok: <b>{urun["stok"]} Adet</b></p>
                 <h4 style="color: #f39c12; margin: 3px 0;">${urun["fiyat_usd"]:,} <span style="font-size: 0.75rem; color: #bbb;">(USD)</span></h4>
                 <p style="color: #2ecc71; font-size: 0.95rem; font-weight: bold;">₺{fiyat_tl:,.2f} <span style="font-size: 0.7rem; color: #bbb;">(KDV Hariç)</span></p>
             """,
             unsafe_allow_html=True,
         )
-        if st.button(f"➕ Sepete Ekle", key=f"ekle_{urun['id']}"):
-          st.session_state.sepet.append(
-              {
-                  "id": urun["id"],
-                  "ad": urun["ad"],
-                  "fiyat_usd":urun["fiyat_usd"],
-                  "fiyat_tl": fiyat_tl,
-              }
-          )
-          st.success(f"'{urun['ad']}' sepete eklendi!")
+        if urun["stok"] > 0:
+          if st.button(f"➕ Sepete Ekle", key=f"ekle_{urun['id']}"):
+            st.session_state.sepet.append(
+                {
+                    "id": urun["id"],
+                    "ad": urun["ad"],
+                    "fiyat_usd": urun["fiyat_usd"],
+                    "fiyat_tl": fiyat_tl,
+                }
+            )
+            st.success(f"'{urun['ad']}' sepete eklendi!")
+        else:
+          st.warning("Stok Tükendi")
         st.markdown(f"</div>", unsafe_allow_html=True)
 
   if gorunen_urun_sayisi == 0:
     st.info("Aradığınız kriterlere uygun ürün bulunamadı.")
 
 # ---------------------------------------------------------
-# SAYFA 2: TEKLİF SEPETİM
+# 3. TEKLİF SEPETİM
 # ---------------------------------------------------------
 elif sayfa == "Teklif Sepetim":
   st.subheader("🛒 Teklif Sepetiniz")
@@ -317,7 +425,7 @@ elif sayfa == "Teklif Sepetim":
       st.rerun()
 
 # ---------------------------------------------------------
-# SAYFA 3: DÖVİZ KURU BİLGİSİ
+# 4. DÖVİZ KURU BİLGİSİ
 # ---------------------------------------------------------
 elif sayfa == "Döviz Kuru Bilgisi":
   st.subheader("💱 Anlık Kur Entegrasyonu ve Fiyatlandırma Politikası")
@@ -331,7 +439,7 @@ elif sayfa == "Döviz Kuru Bilgisi":
   st.info(f"Geçerli Dolar Kuru: **{st.session_state.dolar_kur} TL**")
 
   st.markdown("### 📋 Katalog Ürünlerinin Güncel TL Karşılıkları")
-  for u in urunler_db:
+  for u in st.session_state.urunler_db:
     hesaplanan_tl = u["fiyat_usd"] * st.session_state.dolar_kur
     st.write(
         f"- **{u['ad']}** | Liste Fiyatı: ${u['fiyat_usd']} | Güncel Satış"
@@ -339,7 +447,7 @@ elif sayfa == "Döviz Kuru Bilgisi":
     )
 
 # ---------------------------------------------------------
-# SAYFA 4: İLETİŞİM & TALEP FORMU
+# 5. İLETİŞİM & TALEP FORMU
 # ---------------------------------------------------------
 elif sayfa == "İletişim & Talep Formu":
   st.subheader("📍 İletişim ve Proje Başvurusu")
